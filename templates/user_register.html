@@ -4,6 +4,9 @@
     </head>
 
     <body>
+        {% if error %}}
+        <h2>{{error}}</h2>
+        {%endif%}
         <h1>Customer Register</h1>
         <form action="/customer_register" method="POST">
             <input type="email" name="email" placeholder="email" required></br>

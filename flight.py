@@ -31,6 +31,7 @@ def publicinfo():
 @app.route('/agent_register', methods=['POST', 'GET'])
 def agent_register():
     if request.method == 'GET':
+        error = None;
         return render_template('agent_register.html')
     if request.method == 'POST':
         email=request.form.get('email')
@@ -43,7 +44,7 @@ def agent_register():
         cursor.close()
         if (existed_user):
             error = 'Agent Exists'
-            return redirect('/agent_register')
+            return redirect('/agent_register', error = error)
         else:
             cursor = conn.cursor()
             insert_query = "insert into booking_agent values ('{}', md5('{}'), {});"
