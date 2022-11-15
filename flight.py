@@ -145,16 +145,17 @@ def home():
             flight join ticket using (airline_name, flight_num) where customer_email = '{}' and arrival_time > curtime();"
         cursor.execute(upcoming_query.format(email))
         upcoming_flights=cursor.fetchall()
-        # print(email)
-        # print(role)
-        # print(upcoming_flights)
-        # print(name)
-        # print(name[0])
         return render_template('/home.html', role = role, upcoming_flights = upcoming_flights, name=name[0])
     elif role=='booking_agent':
         return "Under Construction for booking agent"
     elif role=='airline_staff':
         return "under construction for airline_staff"
+    
+@app.route('/logout')
+def logout():
+    session.pop('role')
+    session.pop('email')
+    return redirect('/')
     
         
         
