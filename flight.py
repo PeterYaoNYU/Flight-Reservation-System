@@ -5,6 +5,8 @@ app = Flask(__name__)
 
 conn = mysql.connector.connect(host='localhost', user='root', password='20021228Peter', database = 'flight')
 
+app.secret_key="I hate expectation maximization!"
+
 @app.route('/')
 def hello():
     return render_template('index.html')
@@ -127,6 +129,37 @@ def login():
         #         session['role'] = role
         #         session['email'] = email
         #         return redirect('/home')
+        
+@app.route('/home', methods=['GET'])
+def home():
+    role = session['role']
+    email = session['email']
+    cursor=conn.cursor()
+    if role=='customer':
+        # fetch the name of the customer so that we can greet them on their homepage
+        upcoming_flights = None
+        name_query = "select name from customer where email = '{}';"
+        cursor.execute(name_query.format(email))
+        name = cursor.fetchone()
+        upcoming_query="select airline_name, flight_num, DATE_FORMAT(departure_time, '%Y.%m.%d %k:%i'), DATE_FORMAT(arrival_time, '%Y.%m.%d %k:%i'), status, arrive_airport, depart_airport from\
+            flight join ticket using (airline_name, flight_num) where customer_email = '{}' and arrival_time > curtime();"
+        cursor.execute(upcoming_query.format(email))
+        upcoming_flights=cursor.fetchall()
+        # print(email)
+        # print(role)
+        # print(upcoming_flights)
+        # print(name)
+        # print(name[0])
+        return render_template('/home.html', role = role, upcoming_flights = upcoming_flights, name=name[0])
+    elif role=='booking_agent':
+        return "Under Construction for booking agent"
+    elif role=='airline_staff':
+        return "under construction for airline_staff"
+    
+        
+        
+        
+
                 
             
             
