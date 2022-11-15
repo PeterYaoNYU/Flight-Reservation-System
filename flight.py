@@ -44,7 +44,7 @@ def agent_register():
         cursor.close()
         if (existed_user):
             error = 'Agent Exists'
-            return redirect('/agent_register', error = error)
+            return redirect('/agent_register?error=%s' % error)
         else:
             cursor = conn.cursor()
             insert_query = "insert into booking_agent values ('{}', md5('{}'), {});"
@@ -84,6 +84,51 @@ def customer_register():
             insert_query = "insert into customer values '{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}'"
             cursor.execute(insert_query.format(name, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth))
             cursor.close()
+            
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+    if request.method == 'POST':
+        role = request.form.get('roles')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        cursor=conn.cursor()
+        query="select * from {} where email='{}' and password=md5('{}');"
+        cursor.execute(query.format(role, email, password))
+        result = cursor.fetchall()
+        if not result:
+            error = "incorrect username or password"
+            return redirect(url_for('login', error=error))
+            # return redirect(url_for('login', error=error))
+        else:
+            session['role'] = role
+            session['email'] = email
+            return redirect('/home')
+        # elif role == 'agent':
+        #     query="select * from booking_agent where email='{}' and password=md5('{}');"
+        #     cursor.execute(query.format(email, password))
+        #     result = cursor.fetchall()
+        #     if not result:
+        #         error = "incorrect username or password"
+        #         return redirect('/login', error=error)
+        #     else:
+        #         session['role'] = role
+        #         session['email'] = email
+        #         return redirect('/home')
+        # elif role == 'staff':
+        #     query="select * from staff where email='{}' and password=md5('{}');"
+        #     cursor.execute(query.format(email, password))
+        #     result = cursor.fetchall()
+        #     if not result:
+        #         error = "incorrect username or password"
+        #         return redirect('/login', error=error)
+        #     else:
+        #         session['role'] = role
+        #         session['email'] = email
+        #         return redirect('/home')
+                
+            
             
             
             

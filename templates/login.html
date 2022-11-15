@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+    {%if request.args.get('error')%}
+    <h1>Login Unsuccessful, wrong username or password</h1>
+    {%endif%}
+    <form action="/login" method="POST">
+        <p>Roles</p>
+        <select name="roles" id="roles">
+            <option value="customer">Customer</option>
+            <option value="booking_agent">Booking Agent</option>
+            <option value="airline_staff">Staff</option>
+        </select></br>
+        <b>email</b><input type="email" name="email" placeholder="yy4108@nyu.edu"></br>
+        <b>password</b><input type="password" name="password"></br>
+        <input type="submit" value="Login">
+    </form>
+    
+</body>
+</html>
