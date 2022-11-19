@@ -25,9 +25,20 @@
             <h1>Welcome Dear {{name}}</h1>
             <h2>Upcoming Flights</h2>
             <table>
+                <tr>
+                    <th>Airline Name</th>
+                    <th>Flight Number</th>
+                    <th>Departure Time</th>
+                    <th>Arrival Time</th>
+                    <th>Status</th>
+                    <th>Destination Airport</th>
+                    <th>Departure Airport</th>
+                </tr>
                 {%for row in upcoming_flights%}
                 <tr>
-                    {{row}}
+                    {%for i in range(8)%}
+                    <td>{{row[i]}}</td>
+                    {%endfor%}
                 </tr>
                 {%endfor%}
             </table>
