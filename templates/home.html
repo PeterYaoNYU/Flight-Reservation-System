@@ -1,6 +1,22 @@
 <html>
     <head>
         <title>Home-Flight Reservation</title>
+        <script src="https://www.gstatic.com/charts/loader.js"></script>
+        <script>
+        google.charts.load('current', {packages: ['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Month');
+            data.addColumn('number', 'Money');
+            data.addRows({{chartdata | tojson | safe}});
+            
+            var options = {'title': 'Spending In The Last 6 Months Breakdown', 'width':800, 'height':400};
+            var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+
+        </script>
     </head>
     <body>
         <a href="/logout">Logout</a>
@@ -14,6 +30,9 @@
                 </tr>
                 {%endfor%}
             </table>
+            <h2>Spending</h2>
+            <h3>Last Year Total Spending: {{last_year_spending}} USD</h3>
+            <div id="chart_div"></div>
         {%endif%}
     </body>
 </html>

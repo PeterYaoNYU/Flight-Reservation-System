@@ -145,7 +145,29 @@ def home():
             flight join ticket using (airline_name, flight_num) where customer_email = '{}' and arrival_time > curtime();"
         cursor.execute(upcoming_query.format(email))
         upcoming_flights=cursor.fetchall()
-        return render_template('/home.html', role = role, upcoming_flights = upcoming_flights, name=name[0])
+        
+        total_money_query = "select sum(price) as spending_last_year\
+            from flight join ticket using (airline_name, flight_num)\
+            where customer_email='{}' and departure_time between DATE_SUB(NOW(),INTERVAL 1 YEAR) and NOW();"
+            
+        cursor.execute(total_money_query.format(email))
+        last_year_spending = cursor.fetchall()[0][0]
+        print(last_year_spending)
+        
+        spending_query="select sum(price) as spending, year(departure_time) as year, month(departure_time) as month\
+            from flight join ticket using (airline_name, flight_num)\
+            where customer_email='{}' and departure_time between DATE_SUB(NOW(), INTERVAL 6 MONTH) and NOW()\
+            group by year(departure_time), month(departure_time);"
+        cursor.execute(spending_query.format(email))
+        spend_stat = cursor.fetchall()
+        chartdata = []
+        for row in spend_stat:
+            chartdata.append([(str(row[1]) + '-'+str(row[2])), float(row[0])])
+        print(chartdata)
+        cursor.close()
+        
+        return render_template('/home.html', role = role, upcoming_flights = upcoming_flights, name=name[0],\
+            last_year_spending = last_year_spending, chartdata=chartdata)
     elif role=='booking_agent':
         return "Under Construction for booking agent"
     elif role=='airline_staff':
@@ -155,7 +177,7 @@ def home():
 def logout():
     session.pop('role')
     session.pop('email')
-    return redirect('/')
+    return redirect('/login')
     
         
         
