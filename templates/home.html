@@ -11,7 +11,7 @@
             data.addColumn('number', 'Money');
             data.addRows({{chartdata | tojson | safe}});
             
-            var options = {'title': 'Spending In The Last 6 Months Breakdown', 'width':800, 'height':400};
+            var options = {'title': 'Spending In The Last Few Months Breakdown', 'width':800, 'height':400, 'pieSliceText': 'value'};
             var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
             chart.draw(data, options);
         }
@@ -44,8 +44,11 @@
             </table>
             <h2>Spending</h2>
             <h3>Last Year Total Spending: {{last_year_spending}} USD</h3>
-            <form>
+            <h4>Query Spending Within a Time Period</h4>
+            <form action="/home" method="POST">
+                <span>Start Date</span>
                 <input type="date" name="start_date">
+                <span>End Date</span>
                 <input type="date" name="end_date">
                 <input type="submit" name="submit">
             </form>

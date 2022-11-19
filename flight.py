@@ -145,7 +145,7 @@ def home():
             flight join ticket using (airline_name, flight_num) where customer_email = '{}' and arrival_time > curtime();"
         cursor.execute(upcoming_query.format(email))
         upcoming_flights=cursor.fetchall()
-        
+        # calculate the toal money spent last year
         total_money_query = "select sum(price) as spending_last_year\
             from flight join ticket using (airline_name, flight_num)\
             where customer_email='{}' and departure_time between DATE_SUB(NOW(),INTERVAL 1 YEAR) and NOW();"
@@ -154,20 +154,40 @@ def home():
         last_year_spending = cursor.fetchall()[0][0]
         print(last_year_spending)
         
-        spending_query="select sum(price) as spending, year(departure_time) as year, month(departure_time) as month\
-            from flight join ticket using (airline_name, flight_num)\
-            where customer_email='{}' and departure_time between DATE_SUB(NOW(), INTERVAL 6 MONTH) and NOW()\
-            group by year(departure_time), month(departure_time);"
-        cursor.execute(spending_query.format(email))
-        spend_stat = cursor.fetchall()
-        chartdata = []
-        for row in spend_stat:
-            chartdata.append([(str(row[1]) + '-'+str(row[2])), float(row[0])])
-        print(chartdata)
-        cursor.close()
-        
-        return render_template('/home.html', role = role, upcoming_flights = upcoming_flights, name=name[0],\
-            last_year_spending = last_year_spending, chartdata=chartdata)
+        # if the method is get, calculate the money spent in the last 6 months
+        if request.method == 'GET':
+            spending_query="select sum(price) as spending, year(departure_time) as year, month(departure_time) as month\
+                from flight join ticket using (airline_name, flight_num)\
+                where customer_email='{}' and departure_time between DATE_SUB(NOW(), INTERVAL 6 MONTH) and NOW()\
+                group by year(departure_time), month(departure_time);"
+            cursor.execute(spending_query.format(email))
+            spend_stat = cursor.fetchall()
+            chartdata = []
+            for row in spend_stat:
+                chartdata.append([(str(row[1]) + '-'+str(row[2])), float(row[0])])
+            print(chartdata)
+            cursor.close()
+            
+            return render_template('/home.html', role = role, upcoming_flights = upcoming_flights, name=name[0],\
+                last_year_spending = last_year_spending, chartdata=chartdata)
+        # else if the method is POST, get the money spent in the specified time range
+        elif request.method == 'POST':
+            start_date = request.form.get('start_date')
+            end_date = request.form.get('end_date')
+            spending_query="select sum(price) as spending, year(departure_time) as year, month(departure_time) as month\
+                from flight join ticket using (airline_name, flight_num)\
+                where customer_email='{}' and departure_time between '{}' and '{}'\
+                group by year(departure_time), month(departure_time);"
+            print(spending_query.format(email, start_date, end_date))
+            cursor.execute(spending_query.format(email, start_date, end_date))
+            spend_stat = cursor.fetchall()
+            chartdata = []
+            for row in spend_stat:
+                chartdata.append([(str(row[1]) + '-'+str(row[2])), float(row[0])])
+            print(chartdata)
+            cursor.close()
+            return render_template('/home.html', role = role, upcoming_flights = upcoming_flights, name=name[0],\
+                last_year_spending = last_year_spending, chartdata=chartdata)
     elif role=='booking_agent':
         return "Under Construction for booking agent"
     elif role=='airline_staff':
