@@ -130,7 +130,7 @@ def login():
         #         session['email'] = email
         #         return redirect('/home')
         
-@app.route('/home', methods=['GET'])
+@app.route('/home', methods=['GET', 'POST'])
 def home():
     role = session['role']
     email = session['email']
@@ -178,15 +178,3 @@ def logout():
     session.pop('role')
     session.pop('email')
     return redirect('/login')
-    
-        
-        
-        
-
-                
-            
-            
-            
-            
-        
-        
