@@ -1,30 +1,61 @@
 <html>
     <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <title>
             Customer Purchase System
         </title>
     </head>
     <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Air Ticket Reservation System</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/purchase">Purchase</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link disabled" href="/logout">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+
+        <div class="text-bg-primary p-3">
         <form method="POST" action="/purchase">
+            <div class="mb-3">
             <label for="depart">Depart From </label>
-            <select name="depart" id="depart">
+            <select class="form-select" name="depart" id="depart">
                 {% for row in airport_city %} -->
                 <option value="{{row[0]}}">{{row[0]}}/{{row[1]}}</option>
                 {%endfor%}
             </select>
+            </div>
+            <div class="mb-3">
             <label for="arrive">Arrive In</label>
-            <select name="arrive" id="arrive">
+            <select class="form-select" name="arrive" id="arrive">
                 {% for row in airport_city %}
                 <option value="{{row[0]}}">{{row[0]}}/{{row[1]}}</option>
                 {%endfor%}
             </select>
+            </div>
+            <div class="mb-3">
             <label for="depart_date">Departure Date</label>
             <input type="date" name="depart_date">
-            <input type="submit" name="submit">
+            </div>
+            <input class="btn btn-primary" type="submit" name="submit">
         </form>
+        </div>
+        </div>
         {%if avail_flights%} 
-        <table>
-            <tr>
+        <table class="table table-striped">
+            <tr class="table-primary">
                 <th>Airline Name</th>
                 <th>Flight Number</th>
                 <th>Departure Time</th>
@@ -40,7 +71,7 @@
                     {%for i in range(6)%}
                     <td>{{row[i]}}</td>
                     {%endfor%}
-                    <td><input type="submit" value="Buy"></td>
+                    <td><input class="btn btn-primary" type="submit" value="Buy"></td>
                 </form>
             </tr>
             {%endfor%}
