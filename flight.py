@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, redirect, session
+from flask import Flask, render_template, request, url_for, redirect, session, flash
 import mysql.connector
 
 app = Flask(__name__)
@@ -129,6 +129,36 @@ def purchase():
         avail_flights = cursor.fetchall();
         print(avail_flights)
         return render_template('purchase.html', airport_city = airport_city, avail_flights = avail_flights)
+    
+@app.route('/purchase/<flight_num>', methods = ['POST', 'GET'])
+def purchase_confirm(flight_num):
+    # first check if the customer is logged in or not
+    if 'email' not in session:
+        flash("You Will Have to Login First Before Making a Purchase", 'error')
+        return redirect('/login')
+    # use the parameter passed through the address to query the confirmation message
+    # and provide it back to the user interface
+    if request.method == 'GET':
+        # find name of the customer to provide welcome
+        name = findname()
+        cursor = conn.cursor()
+        confirmation_query = "select * from flight where flight_num = '{}';"
+        cursor.execute(confirmation_query.format(flight_num))
+        confirm_message = cursor.fetchone()
+        cursor.close()
+        print(confirm_message)
+        return render_template('purchase_confirm.html', confirm_message = confirm_message, name = name)
+    # the user has clicked the button, put a ticket into the db,
+    # flash a message and redirect the user back to the homepage
+    elif request.method == 'POST':
+        cursor = conn.cursor()
+        # get the unique ticket_id by finding out the current max and then plus one
+        max_query = "select max(ticket_id) from ticket;"
+        print(max_query)
+        
+        
+        
+
             
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -241,3 +271,10 @@ def logout():
     session.pop('role')
     session.pop('email')
     return redirect('/login')
+
+def findname():
+    cursor = conn.cursor()
+    name_query = "select name from customer where email = '{}';"
+    cursor.execute(name_query.format(session['email']))
+    name = cursor.fetchone()
+    return name[0]
