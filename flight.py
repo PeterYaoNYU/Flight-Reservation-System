@@ -264,13 +264,34 @@ def home():
         return redirect("/agent_home")
     elif role=='airline_staff':
         return "under construction for airline_staff"
-    
+
+# begin agent implementation
 @app.route('/agent_home')
 def agent_home():
     if "role" in session and session["role"]=="booking_agent":
         return render_template("agent_home.html", agent_email = session['email'])
     else:
         flash("Must Log In First Before Accessing the Booking Agent Homepage!")
+
+@app.route("/agent_view_flight", methods = ['GET', 'POST'])
+def agent_view_flight():
+    # check if the agent is really logged in
+    if not ("role" in session and session["role"] =="booking_agent"):
+        flash("Agents: Must Log In First Before Viewing Cients' Flights")
+        return redirect("/login")
+    if request.method == "GET":
+        # query all the upcoming flights and push them to the webpage
+        agent_email = session["email"]
+        upcoming_query = "select airline_name, flight_num, customer_email, ticket_id, departure_time, arrival_time, price, arrive_airport, (select city from airport a1 where a1.name=arrive_airport) as arrive_city, depart_airport, (select city from airport a2 where a2.name = depart_airport) as depart_city from ticket natural join flight where ticket.booking_agent_email='{}' and departure_time>=NOW();"
+        cursor = conn.cursor()
+        cursor.execute(upcoming_query.format(agent_email))
+        upcoming_flights = cursor.fetchall()
+        cursor.close()
+        return render_template('agent_view_flight.html', upcoming_flights = upcoming_flights, agent_email = session['email'])
+    
+        
+        
+        
         
     
 @app.route('/logout')
