@@ -10,7 +10,10 @@ app.secret_key="I hate expectation maximization!"
 
 @app.route('/')
 def hello():
-    return render_template('index.html')
+    if 'email' in session:
+        return redirect("/home")
+    else:
+        return render_template('index.html')
 
 
 @app.route('/publicinfo', methods = ['POST', 'GET'])
