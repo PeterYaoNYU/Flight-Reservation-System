@@ -282,11 +282,12 @@ def agent_view_flight():
     if request.method == "GET":
         # query all the upcoming flights and push them to the webpage
         agent_email = session["email"]
-        upcoming_query = "select airline_name, flight_num, customer_email, ticket_id, departure_time, arrival_time, price, arrive_airport, (select city from airport a1 where a1.name=arrive_airport) as arrive_city, depart_airport, (select city from airport a2 where a2.name = depart_airport) as depart_city from ticket natural join flight where ticket.booking_agent_email='{}' and departure_time>=NOW();"
+        upcoming_query = "select airline_name, flight_num, customer_email, ticket_id, departure_time, arrival_time, price, arrive_airport, (select city from airport a1 where a1.name=arrive_airport) as arrive_city, depart_airport, (select city from airport a2 where a2.name = depart_airport) as depart_city from ticket natural join flight where ticket.booking_agent_email='{}' and departure_time>=NOW() order by departure_time ASC;"
         cursor = conn.cursor()
         cursor.execute(upcoming_query.format(agent_email))
         upcoming_flights = cursor.fetchall()
         cursor.close()
+        print(upcoming_flights)
         return render_template('agent_view_flight.html', upcoming_flights = upcoming_flights, agent_email = session['email'])
     
         
