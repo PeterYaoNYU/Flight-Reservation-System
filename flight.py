@@ -87,6 +87,49 @@ def customer_register():
             cursor.execute(insert_query.format(name, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth))
             cursor.close()
             
+@app.route('/purchase', methods=['POST', 'GET'])
+def purchase():
+    # user is not logged in
+    if session['role']!='customer' or not session['email']:
+        return render_template("customer_not_logged_in.html")
+    # get the available cities and airport names for dropdown tables
+    cursor = conn.cursor()
+    city_query = 'select * from airport;'
+    cursor.execute(city_query)
+    airport_city = cursor.fetchall()
+    cursor.close()
+    print(airport_city)
+    # user is just trying to load the webpage
+    if request.method == 'GET': 
+        return render_template('purchase.html', airport_city=airport_city)
+    # user has made a query about which flight they want to purchase
+    # make the query and offer them the options to buy tickets
+    elif request.method == 'POST':
+        depart = request.form.get('depart')
+        arrive = request.form.get('arrive')
+        depart_date = request.form.get('depart_date')
+        # need to make sure that we only get flights with available seats left
+        # could be optimized into a procedure or a function later!!!
+        purchase_query = "with avail_airplane_id as(\
+            select flight_num, airplane_id, seats\
+            from flight f join airplane a on(a.id = f.airplane_id)\
+            where f.depart_airport = '{}' and f.arrive_airport='{}' and date(departure_time) = '{}'\
+            ),\
+            seats_taken as(\
+            select flight_num, count(customer_email) as taken\
+            from ticket natural join avail_airplane_id\
+            group by flight_num\
+            )\
+            select airline_name, flight_num, departure_time, arrival_time, price\
+            from flight natural join avail_airplane_id natural join seats_taken\
+            where avail_airplane_id.seats - seats_taken.taken > 0;"
+        cursor = conn.cursor();
+        cursor.execute(purchase_query.format(depart, arrive, depart_date))
+        print(purchase_query.format(depart_date, arrive, depart))
+        avail_flights = cursor.fetchall();
+        print(avail_flights)
+        return render_template('purchase.html', airport_city = airport_city, avail_flights = avail_flights)
+            
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'GET':
