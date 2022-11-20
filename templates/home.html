@@ -1,5 +1,6 @@
 <html>
     <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <title>Home-Flight Reservation</title>
         <script src="https://www.gstatic.com/charts/loader.js"></script>
         <script>
@@ -19,13 +20,36 @@
         </script>
     </head>
     <body>
-        <a href="/logout">Logout</a>
-        <a href="/purchase">Purchase Ticket</a>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Air Ticket Reservation System</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/purchase">Purchase</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link disabled" href="/logout">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+
+
         {%if role=='customer'%}
-            <h1>Welcome Dear {{name}}</h1>
-            <h2>Upcoming Flights</h2>
-            <table>
-                <tr>
+        <div class="text-bg-primary p-3">
+            <h1>Welcome Dear <span class="badge bg-primary">{{name}}</span></h1>
+            <h2><span class="badge rounded-pill bg-success">Upcoming Flights</span></h2>
+        </div>
+            <table class="table">
+                <thead>
+                <tr class="table-primary">
                     <th>Airline Name</th>
                     <th>Flight Number</th>
                     <th>Departure Time</th>
@@ -34,6 +58,8 @@
                     <th>Destination Airport</th>
                     <th>Departure Airport</th>
                 </tr>
+                </thead>
+                <tbody>
                 {%for row in upcoming_flights%}
                 <tr>
                     {%for i in range(8)%}
@@ -41,10 +67,19 @@
                     {%endfor%}
                 </tr>
                 {%endfor%}
+                </tbody>
             </table>
-            <h2>Spending</h2>
-            <h3>Last Year Total Spending: {{last_year_spending}} USD</h3>
+            <hr class="border border-primary border-3 opacity-75">
+            <div class="text-bg-primary p-3">
+                <h2><span class="badge rounded-pill bg-secondary">Spending</span></h2>
+            </div>
+
+            <div class="mx-auto" style="width: 700px;">
+
+            <h3>Last Year Total Spending: <p class="text-primary">${{last_year_spending}}</p></h3>
             <h4>Query Spending Within a Time Period</h4>
+
+
             <form action="/home" method="POST">
                 <span>Start Date</span>
                 <input type="date" name="start_date">
@@ -53,6 +88,7 @@
                 <input type="submit" name="submit">
             </form>
             <div id="chart_div"></div>
+            </div>
         {%endif%}
     </body>
 </html>
