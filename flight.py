@@ -1,17 +1,8 @@
 from flask import Flask, render_template, request, url_for, redirect, session, flash
 import mysql.connector
 from flask_bootstrap import Bootstrap
-from flask_nav.elements import Navbar, View
-from flask_nav import Nav
-
-topbar = Navbar('NYU SH Trip', View('Home', 'home'), View('Login', 'login'))
-
 
 app = Flask(__name__)
-bootstrap = Bootstrap(app)
-nav = Nav()
-nav.register_element('top', topbar)
-nav.init_app(app)
 
 conn = mysql.connector.connect(host='localhost', user='root', password='20021228Peter', database = 'flight')
 
