@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, url_for, redirect, session, flash
 import mysql.connector
+from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
 
@@ -106,8 +107,11 @@ def purchase():
     # make the query and offer them the options to buy tickets
     elif request.method == 'POST':
         depart = request.form.get('depart')
+        print(depart)
         arrive = request.form.get('arrive')
+        print(arrive)
         depart_date = request.form.get('depart_date')
+        print(depart_date)
         # need to make sure that we only get flights with available seats left
         # could be optimized into a procedure or a function later!!!
         purchase_query = "with avail_airplane_id as(\
@@ -117,7 +121,7 @@ def purchase():
             ),\
             seats_taken as(\
             select flight_num, count(customer_email) as taken\
-            from ticket natural join avail_airplane_id\
+            from ticket natural right outer join avail_airplane_id\
             group by flight_num\
             )\
             select airline_name, flight_num, departure_time, arrival_time, price\
@@ -125,7 +129,7 @@ def purchase():
             where avail_airplane_id.seats - seats_taken.taken > 0;"
         cursor = conn.cursor();
         cursor.execute(purchase_query.format(depart, arrive, depart_date))
-        print(purchase_query.format(depart_date, arrive, depart))
+        print(purchase_query.format(depart, arrive, depart_date))
         avail_flights = cursor.fetchall();
         print(avail_flights)
         return render_template('purchase.html', airport_city = airport_city, avail_flights = avail_flights)
@@ -154,9 +158,21 @@ def purchase_confirm(flight_num):
         cursor = conn.cursor()
         # get the unique ticket_id by finding out the current max and then plus one
         max_query = "select max(ticket_id) from ticket;"
-        print(max_query)
+        cursor.execute(max_query)
+        max_ticket_id = cursor.fetchone()[0] + 1
+        print(max_ticket_id)
+        # get the airline name by the flight number 
+        airline_name = get_airline_name(flight_num);
+        # insert into the ticket table the corresponding values 
+        insert_ticket_query = "insert into ticket values('{}', '{}', '{}', NULL, '{}');"
+        print(insert_ticket_query.format(max_ticket_id, airline_name, flight_num, session['email']))
         
-        
+        cursor.execute(insert_ticket_query.format(max_ticket_id, airline_name, flight_num, session['email']))
+        conn.commit()
+        cursor.close()
+        # redirect back to the homepage with a flash message(shall be implemented in the base template)
+        flash("Purchase Is Complete")
+        return redirect('/home')
         
 
             
@@ -277,4 +293,12 @@ def findname():
     name_query = "select name from customer where email = '{}';"
     cursor.execute(name_query.format(session['email']))
     name = cursor.fetchone()
+    cursor.close()
     return name[0]
+
+def get_airline_name(flight_num):
+    cursor = conn.cursor()
+    name_query = "select airline_name from flight where flight_num = '{}';"
+    cursor.execute(name_query.format(flight_num))
+    airline_name = cursor.fetchone()[0]
+    return airline_name
