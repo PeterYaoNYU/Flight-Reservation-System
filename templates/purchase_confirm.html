@@ -25,6 +25,19 @@
             </div>
           </nav>
 
+
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="list-group">
+            {% for category, message in messages %}
+              <li class="list-group-item list-group-item-primary">{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+
+        
         <h1>Dear <span class="badge bg-primary">{{name}}</span>, Please Confirm Your Purchase</h1>
         {%if confirm_message%} 
         <table class="table">

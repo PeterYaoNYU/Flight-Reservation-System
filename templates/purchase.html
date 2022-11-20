@@ -27,6 +27,17 @@
             </div>
           </nav>
 
+
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="list-group">
+            {% for category, message in messages %}
+              <li class="list-group-item list-group-item-primary">{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
         <div class="text-bg-primary p-3">
         <form method="POST" action="/purchase">
             <div class="mb-3">
