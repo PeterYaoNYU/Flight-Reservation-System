@@ -25,10 +25,10 @@
             </div>
           </nav>
 
-        <h1>Dear <span class="badge bg-primary">{{name}}</span>, Please Confirm Your Purchase for the Following Flight</h1>
+        <h1>Dear <span class="badge bg-primary">{{name}}</span>, Please Confirm Your Purchase</h1>
         {%if confirm_message%} 
-        <table>
-            <tr>
+        <table class="table">
+            <tr class="table-primary">
                 <th>Airline Name</th>
                 <th>Flight Number</th>
                 <th>Departure Time</th>
@@ -46,8 +46,10 @@
             </tr>
         </table>
         {%endif%}
+        <div class="mx-auto" style="width: 200px;">
         <form action="/purchase/{{confirm_message[1]}}" method="POST">
-            <input type="submit" value="Confirm">
+            <input class="btn btn-primary" type="submit" value="Confirm">
         </form>
+        <div>
     </body>
 </html>
