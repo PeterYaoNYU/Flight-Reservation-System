@@ -193,34 +193,12 @@ def login():
         result = cursor.fetchall()
         if not result:
             error = "incorrect username or password"
+            flash("incorrect username or password")
             return redirect(url_for('login', error=error))
-            # return redirect(url_for('login', error=error))
         else:
             session['role'] = role
             session['email'] = email
             return redirect('/home')
-        # elif role == 'agent':
-        #     query="select * from booking_agent where email='{}' and password=md5('{}');"
-        #     cursor.execute(query.format(email, password))
-        #     result = cursor.fetchall()
-        #     if not result:
-        #         error = "incorrect username or password"
-        #         return redirect('/login', error=error)
-        #     else:
-        #         session['role'] = role
-        #         session['email'] = email
-        #         return redirect('/home')
-        # elif role == 'staff':
-        #     query="select * from staff where email='{}' and password=md5('{}');"
-        #     cursor.execute(query.format(email, password))
-        #     result = cursor.fetchall()
-        #     if not result:
-        #         error = "incorrect username or password"
-        #         return redirect('/login', error=error)
-        #     else:
-        #         session['role'] = role
-        #         session['email'] = email
-        #         return redirect('/home')
         
 @app.route('/home', methods=['GET', 'POST'])
 def home():

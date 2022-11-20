@@ -18,6 +18,17 @@
             </li>
         </div>
       </nav>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="list-group">
+        {% for category, message in messages %}
+          <li class="list-group-item list-group-item-danger">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
     {%if request.args.get('error')%}
     <h1>Login Unsuccessful, wrong username or password</h1>
     {%endif%}
