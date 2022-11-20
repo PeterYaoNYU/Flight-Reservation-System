@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <title>
+            Customer Purchase System
+        </title>
+    </head>
+    <body>
+        <form method="POST" action="/purchase">
+            <label for="depart">Depart From </label>
+            <select name="depart" id="depart">
+                {% for row in airport_city %} -->
+                <option value="{{row[0]}}">{{row[0]}}/{{row[1]}}</option>
+                {%endfor%}
+            </select>
+            <label for="arrive">Arrive In</label>
+            <select name="arrive" id="arrive">
+                {% for row in airport_city %}
+                <option value="{{row[0]}}">{{row[0]}}/{{row[1]}}</option>
+                {%endfor%}
+            </select>
+            <label for="depart_date">Departure Date</label>
+            <input type="date" name="depart_date">
+            <input type="submit" name="submit">
+        </form>
+        {%if avail_flights%} 
+        <table>
+            <tr>
+                <th>Airline Name</th>
+                <th>Flight Number</th>
+                <th>Departure Time</th>
+                <th>Arrival Time</th>
+                <th>Price</th>
+                <!-- <th>Status</th> -->
+                <!-- <th>Destination Airport</th>
+                <th>Departure Airport</th> -->
+            </tr>
+            {%for row in avail_flights%}
+            <tr>
+                <form action="/purchase/{{row[1]}}" method="GET">
+                    {%for i in range(6)%}
+                    <td>{{row[i]}}</td>
+                    {%endfor%}
+                    <td><input type="submit" value="Buy"></td>
+                </form>
+            </tr>
+            {%endfor%}
+        </table>
+        {%endif%}
+    </body>
+</html>
