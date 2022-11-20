@@ -21,7 +21,7 @@
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">Air Ticket Reservation System</a>
+            <a class="navbar-brand" href="/">Air Ticket Reservation System</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
@@ -40,6 +40,9 @@
               </ul>
             </div>
           </nav>
+
+
+
           {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             <ul class="list-group">
@@ -49,6 +52,8 @@
             </ul>
           {% endif %}
         {% endwith %}
+
+
 
         {%if role=='customer'%}
         <div class="text-bg-primary p-3">
