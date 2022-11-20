@@ -192,9 +192,10 @@ def login():
         cursor.execute(query.format(role, email, password))
         result = cursor.fetchall()
         if not result:
-            error = "incorrect username or password"
+            # error = "incorrect username or password"
+            # error is deprecated here, use flash which is more flexible
             flash("incorrect username or password")
-            return redirect(url_for('login', error=error))
+            return redirect(url_for('login'))
         else:
             session['role'] = role
             session['email'] = email
@@ -258,10 +259,19 @@ def home():
             cursor.close()
             return render_template('/home.html', role = role, upcoming_flights = upcoming_flights, name=name[0],\
                 last_year_spending = last_year_spending, chartdata=chartdata)
+    # if the role is an agent, the homepage will be completely different
     elif role=='booking_agent':
-        return "Under Construction for booking agent"
+        return redirect("/agent_home")
     elif role=='airline_staff':
         return "under construction for airline_staff"
+    
+@app.route('/agent_home')
+def agent_home():
+    if "role" in session and session["role"]=="booking_agent":
+        return render_template("agent_home.html", agent_email = session['email'])
+    else:
+        flash("Must Log In First Before Accessing the Booking Agent Homepage!")
+        
     
 @app.route('/logout')
 def logout():
