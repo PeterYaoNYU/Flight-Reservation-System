@@ -100,7 +100,11 @@
                 <input type="date" name="end_date">
                 <input type="submit" name="submit">
             </form>
+            {%if chartdata%}
             <div id="chart_div"></div>
+            {%else%} 
+            <h4 style="color:red;">No Flight During This Period</h4>
+            {%endif%}
             </div>
         {%endif%}
     </body>
