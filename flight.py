@@ -245,6 +245,8 @@ def home():
         elif request.method == 'POST':
             start_date = request.form.get('start_date')
             end_date = request.form.get('end_date')
+            if not start_date or not end_date:
+                return redirect("/home")
             spending_query="select sum(price) as spending, year(departure_time) as year, month(departure_time) as month\
                 from flight join ticket using (airline_name, flight_num)\
                 where customer_email='{}' and departure_time between '{}' and '{}'\
