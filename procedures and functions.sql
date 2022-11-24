@@ -58,3 +58,13 @@ from flight natural join avail_airplane_id natural join seats_taken
 where avail_airplane_id.seats - seats_taken.taken > 0;
 
 
+delimiter //
+create procedure getCompany(
+    in agentEmail varchar(30)
+)
+begin
+    select airline_name from works_for where booking_agent_email = agentEmail;
+end //
+delimiter ;
+
+
