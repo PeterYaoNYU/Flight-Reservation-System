@@ -292,23 +292,29 @@ def agent_view_flight():
         print(upcoming_flights)
         return render_template('agent_view_flight.html', upcoming_flights = upcoming_flights, agent_email = session['email'])
     
-@app.route("/agent_purchase", methods = ["GET", "POST"])
+    
+# !!!!!!!!!!!!!!!!!!!!!
+# here I tried out the mysql prepared statement via the mysql-python connector
+@app.route("/agent_search", methods = ["GET", "POST"])
 def agent_purchase():
     # user is not logged in
     if session['role']!='booking_agent' or not session['email']:
         flash("Dear Booking Agent, Please Login Before Purchasing")
         return redirect("/login")
     # get the available cities and airport names for dropdown tables
-    cursor = conn.cursor()
-    city_query = 'select * from airport;'
-    cursor.execute(city_query)
-    airport_city = cursor.fetchall()
+    cursor = conn.cursor(prepared=True)
+    company_query = "call getCompany(%s);"
+    cursor.execute(company_query, (session['email'],))
+    work_for_company = cursor.fetchall()
     cursor.close()
-    print(airport_city)
-    # user is just trying to load the webpage
-    if request.method == 'GET': 
+    print(work_for_company)
+    if request.method == "GET":
+        cursor = conn.cursor(prepared=True)
+        option_query = "call getAirportCity();"
+        cursor.execute(option_query)
+        airport_city = cursor.fetchall()
         return render_template('purchase.html', airport_city=airport_city)
-    # user has made a query about which flight they want to purchase
+    # booking agent has made a query about which flight they want to purchase
     # make the query and offer them the options to buy tickets
     elif request.method == 'POST':
         depart = request.form.get('depart')
@@ -317,31 +323,20 @@ def agent_purchase():
         print(arrive)
         depart_date = request.form.get('depart_date')
         print(depart_date)
-        # need to make sure that we only get flights with available seats left
-        # could be optimized into a procedure or a function later!!!
-        purchase_query = "with avail_airplane_id as(\
-            select flight_num, airplane_id, seats\
-            from flight f join airplane a on(a.id = f.airplane_id)\
-            where f.depart_airport = '{}' and f.arrive_airport='{}' and date(departure_time) = '{}'\
-            ),\
-            seats_taken as(\
-            select flight_num, count(customer_email) as taken\
-            from ticket natural right outer join avail_airplane_id\
-            group by flight_num\
-            )\
-            select airline_name, flight_num, departure_time, arrival_time, price\
-            from flight natural join avail_airplane_id natural join seats_taken\
-            where avail_airplane_id.seats - seats_taken.taken > 0;"
-        cursor = conn.cursor();
-        cursor.execute(purchase_query.format(depart, arrive, depart_date))
-        print(purchase_query.format(depart, arrive, depart_date))
-        avail_flights = cursor.fetchall();
-        print(avail_flights)
-        return render_template('purchase.html', airport_city = airport_city, avail_flights = avail_flights)   
-    
-        
-        
-        
+        if (not depart or not arrive):
+            flash("Please Enter the Departure and Arrival Airport")
+            return redirect("/agent_search")
+        if not depart_date:
+            cursor = conn.cursor()
+            agentSearchNoDate = "call agentSearchNoDate(%s, %s, %s);"
+            cursor.execute(agentSearchNoDate, (depart, arrive, session['email']))
+            avail_flights = cursor.fetchall()
+            cursor.close()
+            return render_template("purchase.html", avail_flights = avail_flights)
+        elif depart_date:
+            
+
+            
         
     
 @app.route('/logout')
