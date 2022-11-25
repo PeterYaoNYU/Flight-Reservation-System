@@ -1,0 +1,6 @@
+1. customer purchase need to show not only airport abbreviation but also city
+
+
+2. agentpurchase confirm procedure also needs to check whether the booking agent is working for this flight!!!
+
+3. agent buy for which customer?

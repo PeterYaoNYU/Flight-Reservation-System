@@ -352,16 +352,21 @@ def agent_search():
         
 @app.route('/agent_purchase/<airline_name>/<flight_num>', methods = ["GET", "POST"])
 def agent_purchase(airline_name, flight_num):
+    if session['role'] != "booking_agent":
+        flash("Dear Booking Agent, Please Login Before Purchasing")
+        return redirect("/login")
     if request.method == "GET":
         # before purchase, check again if there are available flights,
         # in case the ticket is very popular and just got sold out!
         # also check if the agent really works for this airline company!!!
         conn.reconnect()
         cursor = conn.cursor(prepared= True)
-        cursor.callproc("agentPurchaseConfirm", (airline_name, flight_num))
-        avail_flights = []
-        for result in cursor.stored_results():
-            avail_flights = result.fetchall()
+        # cursor.callproc("agentPurchaseConfirm", (airline_name, flight_num, session['email']))
+        # avail_flights = []
+        # for result in cursor.stored_results():
+        #     avail_flights = result.fetchall()
+        cursor.execute("call agentPurchaseConfirm(%s, %s, %s);", (airline_name, flight_num, session['email']))
+        avail_flights = cursor.fetchall()
         print(avail_flights)
         cursor.close()
         # now get customer info to decide for whom this purchas is for
@@ -370,11 +375,22 @@ def agent_purchase(airline_name, flight_num):
         cursor = conn.cursor()
         cursor.execute(stmt)
         customer_info = cursor.fetchall()
+        print(customer_info)
         if avail_flights:
             return(render_template("agent_purchase.html", avail_flights = avail_flights, customer_info = customer_info))
         elif not avail_flights:
             return (render_template("agent_purchase.html", error = "No Flight Now"))
     elif request.method == "POST":
+        customer_email = request.form.get("customer_email")
+        print("PURCHASING: ", customer_email)
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        print("call agentPurchase (%s, %s, %s, %s)", airline_name, flight_num, session['email'], customer_email)
+        cursor.execute("call agentPurchase (%s, %s, %s, %s);", (airline_name, flight_num, session['email'], customer_email))
+        conn.commit()
+        cursor.close()
+        flash("Agent Puchase Success")
+        return redirect("/agent_search")
 
         
     

@@ -1,0 +1,104 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <title>
+            Agent Search System
+        </title>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand p-2" href="/">Air Ticket Reservation System</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/agent_view_flight">View Flights</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/purchase">Purchase</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/agent_commission">Commission</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/agent_top_customers">Top Clients</a>
+                </li>
+                
+                <li class="nav-item">
+                  <a class="nav-link " href="/logout">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="list-group">
+            {% for category, message in messages %}
+              <li class="list-group-item list-group-item-primary">{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <div class="text-bg-primary p-3">
+        <form method="POST" action="/agent_search">
+            <div class="mb-3">
+            <label for="depart">Depart From </label>
+            <select class="form-select" name="depart" id="depart">
+                {% for row in airport_city %}
+                <option value="{{row[0]}}">{{row[0]}}/{{row[1]}}</option>
+                {%endfor%}
+            </select>
+            </div>
+            <div class="mb-3">
+            <label for="arrive">Arrive In</label>
+            <select class="form-select" name="arrive" id="arrive">
+                {% for row in airport_city %}
+                <option value="{{row[0]}}">{{row[0]}}/{{row[1]}}</option>
+                {%endfor%}
+            </select>
+            </div>
+            <div class="mb-3">
+            <label for="depart_date">Departure Date <span style="color: red;">(Leave Blank to See All Upcoming)</span></label>
+            <input type="date" name="depart_date">
+            </div>
+            <input class="btn btn-primary" type="submit" name="submit">
+        </form>
+        </div>
+        </div>
+        {%if avail_flights%} 
+        <table class="table table-striped">
+            <tr class="table-primary">
+                <th>Airline Name</th>
+                <th>Flight Number</th>
+                <th>Departure Time</th>
+                <th>Arrival Time</th>
+                <th>Price</th>
+                <!-- <th>Status</th> -->
+                <th>Destination Airport</th>
+                <th>Departure Airport</th>
+                <th>Buy</th>
+            </tr>
+            {%for row in avail_flights%}
+            <tr>
+                <form action="/agent_purchase/{{row[0]}}/{{row[1]}}" method="GET">
+                    {%for i in range(5)%}
+                    <td>{{row[i]}}</td>
+                    {%endfor%}
+                    <td>{{row[7]}}</td>
+                    <td>{{row[8]}}</td>
+                    <td><input class="btn btn-primary" type="submit" value="Buy"></td>
+                </form>
+            </tr>
+            {%endfor%}
+        </table>
+        {%endif%}
+    </body>
+</html>

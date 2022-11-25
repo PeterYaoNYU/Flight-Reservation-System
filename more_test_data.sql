@@ -1,0 +1,11 @@
+insert into airline values ("Qatar Airline");
+insert into airport values ("DIA", "Doha");
+insert into airport values ("SHA", "Shanghai");
+insert into airport values ("PEK", "Beijing");
+insert into airport values ("LHR", "London");
+insert into airline values ("British Airways");
+insert into airplane values ("Qatar Airline", 7777, 429);
+insert into airplane values ("British Airways", 50, 188);
+insert into flight values ("British Airways", "BA98", "2023-01-01 06:00:00", "2023-01-01 06:00:00", 3000, "upcoming", 50, "PEK", "LHR");
+insert into works_for values ("China Eastern", "bookingagent1@gmail.com");
+insert into works_for values ("British Airways", "bookingagent1@gmail.com");
