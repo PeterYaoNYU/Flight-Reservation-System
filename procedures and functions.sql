@@ -86,7 +86,7 @@ begin
         from works_for
         where booking_agent_email = agentEmail
     )
-    select *
+    select airline_name, flight_num, departure_time, arrival_time, price, status, airplane_id, concat(arrive_airport, '/', (select city from airport where name = arrive_airport)), concat(depart_airport, '/', (select city from airport where name = depart_airport))
     from flight as f
     where f.airline_name in (select * from avail_airlines)
     and f.departure_time > NOW()
@@ -110,7 +110,7 @@ begin
         from works_for
         where booking_agent_email = agentEmail
     )
-    select *
+    select airline_name, flight_num, departure_time, arrival_time, price, status, airplane_id, concat(arrive_airport, '/', (select city from airport where name = arrive_airport)), concat(depart_airport, '/', (select city from airport where name = depart_airport))
     from flight as f
     where f.airline_name in (select * from avail_airlines)
     and DATE(f.departure_time) = departDate
