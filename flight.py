@@ -350,9 +350,9 @@ def agent_search():
             cursor.close()
             return render_template("agent_search.html", avail_flights=avail_flights, airport_city = airport_city)
         
-@app.route('/agent_purchase/<airline_name>/<flight_num>')
-def agent_purchase(airline_name, flight_num):
-
+# @app.route('/agent_purchase/<airline_name>/<flight_num>', methods = ["GET", ])
+# def agent_purchase(airline_name, flight_num):
+#     if request.method 
     
 @app.route('/logout')
 def logout():

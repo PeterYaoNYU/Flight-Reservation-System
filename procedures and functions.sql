@@ -121,5 +121,37 @@ begin
 end//
 delimiter ;
 
+-- to provide safety check layer for agent_purchase_confirmation
+delimiter //
+create procedure agentPurchaseConfirm(
+    in airlineName varchar(30),
+    in flightNum varchar(30)
+)
+begin
+    declare seatsTaken int;
+    declare totalSeats int;
+    declare airplaneId int;
+
+    SELECT airplane_id into airplaneId
+    from flight
+    where flight_num = flightNum and airline_name = airlineName;
+
+    select seats
+    into totalSeats
+    from airplane
+    WHERE id = airplaneId;
+
+    SELECT count(*)
+    into seatsTaken
+    from ticket t
+    where t.airline_name = airlineName
+    and t.flight_num = flightNum;
+
+    if totalSeats > seatsTaken then
+        select * from flight f1 where f1.airline_name = airlineName and f1.flight_num = flightNum;
+    end if;
+end//
+delimiter ;
+
 
 
