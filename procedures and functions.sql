@@ -125,7 +125,8 @@ delimiter ;
 delimiter //
 create procedure agentPurchaseConfirm(
     in airlineName varchar(30),
-    in flightNum varchar(30)
+    in flightNum varchar(30),
+    in agentEmail   varchar(30)
 )
 begin
     declare seatsTaken int;
@@ -147,11 +148,27 @@ begin
     where t.airline_name = airlineName
     and t.flight_num = flightNum;
 
-    if totalSeats > seatsTaken then
+    if totalSeats > seatsTaken and airlineName in (select airline_name from works_for where agentEmail = booking_agent_email) then
         select * from flight f1 where f1.airline_name = airlineName and f1.flight_num = flightNum;
     end if;
 end//
 delimiter ;
 
+delimiter //
+create procedure agentPurchase(
+    in airlineName  varchar(30),
+    in flightNum    varchar(30),
+    in bookingAgentEmail    varchar(30),
+    in customerEmail    varchar(30)
+)
+begin
+    declare nextTicketId int;
 
+    select max(ticket_id)+1
+    into nextTicketId 
+    from ticket;
+
+    insert into ticket VALUES (nextTicketId, airlineName, flightNum, bookingAgentEmail, customerEmail);
+end//
+delimiter ;
 

@@ -350,9 +350,33 @@ def agent_search():
             cursor.close()
             return render_template("agent_search.html", avail_flights=avail_flights, airport_city = airport_city)
         
-# @app.route('/agent_purchase/<airline_name>/<flight_num>', methods = ["GET", ])
-# def agent_purchase(airline_name, flight_num):
-#     if request.method 
+@app.route('/agent_purchase/<airline_name>/<flight_num>', methods = ["GET", "POST"])
+def agent_purchase(airline_name, flight_num):
+    if request.method == "GET":
+        # before purchase, check again if there are available flights,
+        # in case the ticket is very popular and just got sold out!
+        # also check if the agent really works for this airline company!!!
+        conn.reconnect()
+        cursor = conn.cursor(prepared= True)
+        cursor.callproc("agentPurchaseConfirm", (airline_name, flight_num))
+        avail_flights = []
+        for result in cursor.stored_results():
+            avail_flights = result.fetchall()
+        print(avail_flights)
+        cursor.close()
+        # now get customer info to decide for whom this purchas is for
+        conn.reconnect()
+        stmt = "select name, email from customer order by name;"
+        cursor = conn.cursor()
+        cursor.execute(stmt)
+        customer_info = cursor.fetchall()
+        if avail_flights:
+            return(render_template("agent_purchase.html", avail_flights = avail_flights, customer_info = customer_info))
+        elif not avail_flights:
+            return (render_template("agent_purchase.html", error = "No Flight Now"))
+    elif request.method == "POST":
+
+        
     
 @app.route('/logout')
 def logout():
