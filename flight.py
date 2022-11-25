@@ -269,8 +269,13 @@ def home():
         return redirect("/agent_home")
     elif role=='airline_staff':
         return "under construction for airline_staff"
+    
+# ******************************************************************
+# ******************************************************************
+# Agent Functions Start Here
+# ******************************************************************
+# ******************************************************************
 
-# begin agent implementation
 @app.route('/agent_home')
 def agent_home():
     if "role" in session and session["role"]=="booking_agent":
@@ -312,9 +317,6 @@ def agent_search():
     airport_city = cursor.fetchall()
     cursor.close()
     print("city/airport:", airport_city)
-    airport_city_dict = dict()
-    for p in airport_city:
-        airport_city_dict[p[0]] = p[1]
     # get the available cities and airport names for dropdown tables
     if request.method == "GET":
         return render_template('agent_search.html', airport_city=airport_city)
@@ -348,6 +350,9 @@ def agent_search():
             cursor.close()
             return render_template("agent_search.html", avail_flights=avail_flights, airport_city = airport_city)
         
+@app.route('/agent_purchase/<airline_name>/<flight_num>')
+def agent_purchase(airline_name, flight_num):
+
     
 @app.route('/logout')
 def logout():
