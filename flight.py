@@ -93,10 +93,13 @@ def customer_register():
             
 @app.route('/purchase', methods=['POST', 'GET'])
 def purchase():
+    if session['role'] == 'booking_agent' and session['email']:
+        return redirect("/agent_search")
     # user is not logged in
     if session['role']!='customer' or not session['email']:
         return render_template("customer_not_logged_in.html")
     # get the available cities and airport names for dropdown tables
+    conn.reconnect()
     cursor = conn.cursor()
     city_query = 'select * from airport;'
     cursor.execute(city_query)
@@ -296,24 +299,22 @@ def agent_view_flight():
 # !!!!!!!!!!!!!!!!!!!!!
 # here I tried out the mysql prepared statement via the mysql-python connector
 @app.route("/agent_search", methods = ["GET", "POST"])
-def agent_purchase():
+def agent_search():
     # user is not logged in
     if session['role']!='booking_agent' or not session['email']:
         flash("Dear Booking Agent, Please Login Before Purchasing")
         return redirect("/login")
-    # get the available cities and airport names for dropdown tables
-    cursor = conn.cursor(prepared=True)
-    company_query = "call getCompany(%s);"
-    cursor.execute(company_query, (session['email'],))
-    work_for_company = cursor.fetchall()
+    # get the potential destinations and such
+    conn.reconnect()
+    cursor = conn.cursor()
+    stmt = "select * from airport"
+    cursor.execute(stmt);
+    airport_city = cursor.fetchall()
     cursor.close()
-    print(work_for_company)
+    print("city/airport:", airport_city)
+    # get the available cities and airport names for dropdown tables
     if request.method == "GET":
-        cursor = conn.cursor(prepared=True)
-        option_query = "call getAirportCity();"
-        cursor.execute(option_query)
-        airport_city = cursor.fetchall()
-        return render_template('purchase.html', airport_city=airport_city)
+        return render_template('agent_search.html', airport_city=airport_city)
     # booking agent has made a query about which flight they want to purchase
     # make the query and offer them the options to buy tickets
     elif request.method == 'POST':
@@ -327,16 +328,21 @@ def agent_purchase():
             flash("Please Enter the Departure and Arrival Airport")
             return redirect("/agent_search")
         if not depart_date:
-            cursor = conn.cursor()
+            conn.reconnect()
+            cursor = conn.cursor(prepared=True)
             agentSearchNoDate = "call agentSearchNoDate(%s, %s, %s);"
             cursor.execute(agentSearchNoDate, (depart, arrive, session['email']))
             avail_flights = cursor.fetchall()
-            cursor.close()
-            return render_template("purchase.html", avail_flights = avail_flights)
+            # cursor.close()
+            return render_template("agent_search.html", avail_flights = avail_flights, airport_city = airport_city)
         elif depart_date:
-            
-
-            
+            conn.reconnect()
+            cursor = conn.cursor(prepared=True)
+            agentSearchWithDate = "call agentSearchWithDate(%s, %s, %s, %s);"
+            cursor.execute(agentSearchWithDate, (depart, arrive, depart_date, session['email']))
+            avail_flights = cursor.fetchall()
+            # cursor.close()
+            return render_template("agent_search.html", avail_flights=avail_flights, airport_city = airport_city)
         
     
 @app.route('/logout')

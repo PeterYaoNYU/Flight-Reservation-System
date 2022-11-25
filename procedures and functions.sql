@@ -97,7 +97,29 @@ begin
 end//
 delimiter ;
 
-
+delimiter //
+create procedure agentSearchWithDate(
+    in depart varchar(30),
+    in arrive varchar(30),
+    in departDate varchar(30),
+    in agentEmail varchar(30)
+)
+begin
+    with avail_airlines as(
+        select airline_name
+        from works_for
+        where booking_agent_email = agentEmail
+    )
+    select *
+    from flight as f
+    where f.airline_name in (select * from avail_airlines)
+    and DATE(f.departure_time) = departDate
+    and f.arrive_airport = arrive
+    and f.depart_airport = depart
+    and (select count(*) from ticket t where t.flight_num = f.flight_num) < 
+        (select seats from airplane a where a.id = f.airplane_id);
+end//
+delimiter ;
 
 
 
