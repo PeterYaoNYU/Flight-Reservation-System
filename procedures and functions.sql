@@ -172,3 +172,27 @@ begin
 end//
 delimiter ;
 
+delimiter //
+create procedure viewMyCommissionNotDefault(
+    in agentEmail   varchar(30),
+    in startDate    date,
+    in dateRange    int,
+    out totalAmount numeric(12,2),
+    out averageCommission   numeric(12,2),
+    out totalTicket int
+)
+begin
+    select sum(price) * 0.1
+    into totalAmount
+    from ticket natural join flight
+    where booking_agent_email=agentEmail
+    and datediff(startDate, date(departure_time)) BETWEEN 0 and dateRange;
+
+    select count(ticket_id) into totalTicket
+    from ticket natural join flight
+    where booking_agent_email = agentEmail
+    and datediff(startDate, date(departure_time)) BETWEEN 0 and dateRange;
+
+    SELECT totalAmount/totalTicket into averageCommission;
+end//
+delimiter ; 
