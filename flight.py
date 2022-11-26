@@ -273,6 +273,7 @@ def home():
 # ******************************************************************
 # ******************************************************************
 # Agent Functions Start Here
+# prepared statements used!
 # ******************************************************************
 # ******************************************************************
 
@@ -391,7 +392,26 @@ def agent_purchase(airline_name, flight_num):
         cursor.close()
         flash("Agent Puchase Success")
         return redirect("/agent_search")
-
+    
+@app.route("/agent_commission", methods = ["GET", "POST"])
+def agent_commission():
+    if session['role'] != "booking_agent" or not session['email']:
+        flash("Have to Login First as a Booking Agent")
+        return redirect("/login")
+    if request.method == "GET":
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        print(session['email'])
+        cursor.execute("call viewMyCommissionNotDefault(%s, date(now()), 30, @totalAmount, @averageCommission, @totalTicket)", (session['email'], ))
+        cursor.execute("select @totalAmount;")
+        total_amount = float(cursor.fetchone()[0])
+        cursor.execute("select @averageCommission;")
+        average_commission = float(cursor.fetchone()[0])
+        cursor.execute("select @totalTicket;")
+        total_ticket = int(cursor.fetchone()[0])
+        print(total_amount, average_commission, total_ticket)
+        return render_template("agent_commission.html", total_amount = total_amount, average_commission = average_commission, total_ticket = total_ticket)
+    
         
     
 @app.route('/logout')
