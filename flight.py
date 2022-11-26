@@ -1,12 +1,17 @@
 from flask import Flask, render_template, request, url_for, redirect, session, flash
 import mysql.connector
 from flask_bootstrap import Bootstrap
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, DateField, SelectField, IntegerField
+from wtforms.validators import DataRequired, Email, NumberRange
 
 app = Flask(__name__)
 
 conn = mysql.connector.connect(host='localhost', user='root', password='20021228Peter', database = 'flight')
 
 app.secret_key="I hate expectation maximization!"
+app.config['SECRET_KEY'] = "I hate expectation maximization!"
+bootstrap = Bootstrap(app)
 
 @app.route('/')
 def hello():
@@ -393,11 +398,17 @@ def agent_purchase(airline_name, flight_num):
         flash("Agent Puchase Success")
         return redirect("/agent_search")
     
+class CommissionForm(FlaskForm):
+    start_date = DateField("Search the Commission From This Date Backward", validators=[DataRequired()])
+    date_range = IntegerField("Number of Dates to Query", validators=[DataRequired(), NumberRange(min=0, max=365)])
+    submit = SubmitField("Submit")
+    
 @app.route("/agent_commission", methods = ["GET", "POST"])
 def agent_commission():
     if session['role'] != "booking_agent" or not session['email']:
         flash("Have to Login First as a Booking Agent")
         return redirect("/login")
+    form = CommissionForm()
     if request.method == "GET":
         conn.reconnect()
         cursor = conn.cursor(prepared=True)
@@ -410,7 +421,7 @@ def agent_commission():
         cursor.execute("select @totalTicket;")
         total_ticket = int(cursor.fetchone()[0])
         print(total_amount, average_commission, total_ticket)
-        return render_template("agent_commission.html", total_amount = total_amount, average_commission = average_commission, total_ticket = total_ticket)
+        return render_template("agent_commission.html", total_amount = total_amount, average_commission = average_commission, total_ticket = total_ticket, form = form)
     
         
     
