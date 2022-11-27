@@ -1,0 +1,83 @@
+<html>
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="styles.css">
+        <title>Home-Flight Reservation</title>
+        <script src="https://www.gstatic.com/charts/loader.js"></script>
+        <script>
+        google.charts.load('current', {packages: ['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Name');
+            data.addColumn('number', 'Tickets');
+            data.addRows({{based_on_ticket[0] | tojson | safe}});
+            
+            var options = {'title': 'Based On Tickets', 'width':800, 'height':400, 'pieSliceText': 'value'};
+            var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+
+        </script>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand p-2" href="/">Air Ticket Reservation System</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/agent_view_flight">View Flights</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/purchase">Purchase</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/agent_commission">Commission</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/agent_top_customers">Top Clients</a>
+                </li>
+                
+                <li class="nav-item">
+                  <a class="nav-link " href="/logout">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+
+
+
+          <div class="container text-left" style="padding: 20px;">
+            <div class="row">
+              <div class="col">
+                <ol class="list-group list-group-numbered">
+                    {%for row in based_on_ticket%}
+                    <li class="list-group-item">{{row[0]}} <span class="badge bg-primary rounded-pill">{{row[2]}} tickets</span></li>
+                    {%endfor%}
+                </ol>
+              </div>
+              <div class="col">
+                <ol class="list-group list-group-numbered">
+                    {%for row in based_on_money%}
+                    <li class="list-group-item">{{row[0]}} <span class="badge bg-primary rounded-pill">${{row[2]}}</span></li>
+                    {%endfor%}
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <div id="chart_div"></div>
+
+
+        
+    </body>
+</html>
