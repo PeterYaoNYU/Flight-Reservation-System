@@ -454,6 +454,23 @@ def agent_commission():
             print(type(date_range), date_range)
         total_amount, average_commission, total_ticket = db_get_commission(start_date, date_range)
         return render_template("agent_commission.html", total_amount = total_amount, average_commission = average_commission, total_ticket = total_ticket, form = form)
+    
+    
+@app.route("/agent_top_customers", methods = ["GET",])
+def agent_top_customers():
+    if session['role'] != "booking_agent":
+        flash("Must Login As a Booking Agent")
+        return redirect("/login")
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call top_five_ticket_count(%s);", (session['email'], ))
+    based_on_ticket = cursor.fetchall()
+    conn.reconnect()
+    cursor.execute("call top_five_commission_last_year(%s);", (session['email'], ))
+    based_on_money = cursor.fetchall()
+    print(based_on_ticket)
+    print(based_on_money)
+    return "fuck"
 
 
         
