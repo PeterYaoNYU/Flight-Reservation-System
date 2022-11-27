@@ -470,8 +470,7 @@ def agent_top_customers():
     based_on_money = cursor.fetchall()
     print(based_on_ticket)
     print(based_on_money)
-    return "fuck"
-
+    return render_template("agent_top_customers.html", based_on_ticket = based_on_ticket, based_on_money = based_on_money)
 
         
     
