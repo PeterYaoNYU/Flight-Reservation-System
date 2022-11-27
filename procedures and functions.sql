@@ -207,7 +207,21 @@ begin
     from (ticket t natural join flight f) join customer c on t.customer_email = c.email
     where t.booking_agent_email = agentEmail and departure_time BETWEEN DATE_SUB(now(), INTERVAL 6 MONTH) and now()
     group by customer_email, c.name
-    order by ticket_count
+    order by ticket_count DESC
     limit 5;
 end //
+delimiter ;
+
+delimiter //
+create procedure top_five_commission_last_year(
+    agentEmail  varchar(30)
+)
+begin
+    select name, customer_email, sum(f.price) * 0.1 as commission 
+    from (ticket t natural join flight f) join customer c on t.customer_email = c.email
+    where t.booking_agent_email = agentEmail and departure_time BETWEEN DATE_SUB(now(), INTERVAL 1 YEAR) and now()
+    group by customer_email, c.name
+    order by commission DESC
+    limit 5;
+end//
 delimiter ;
