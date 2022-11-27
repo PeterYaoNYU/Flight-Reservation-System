@@ -196,3 +196,18 @@ begin
     SELECT totalAmount/totalTicket into averageCommission;
 end//
 delimiter ; 
+
+-- top 5 customers based on the number of tickets bought
+delimiter //
+create procedure top_five_ticket_count(
+    in agentEmail   varchar(30)
+)
+begin
+    select name, customer_email, count(ticket_id) as ticket_count
+    from (ticket t natural join flight f) join customer c on t.customer_email = c.email
+    where t.booking_agent_email = agentEmail and departure_time BETWEEN DATE_SUB(now(), INTERVAL 6 MONTH) and now()
+    group by customer_email, c.name
+    order by ticket_count
+    limit 5;
+end //
+delimiter ;
