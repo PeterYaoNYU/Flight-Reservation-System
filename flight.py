@@ -398,11 +398,45 @@ def agent_purchase(airline_name, flight_num):
         flash("Agent Puchase Success")
         return redirect("/agent_search")
     
+    
+# USE WTFORMS TO futher enhance the validation process
 class CommissionForm(FlaskForm):
     start_date = DateField("Search the Commission From This Date Backward", validators=[DataRequired()])
     date_range = IntegerField("Number of Dates to Query", validators=[DataRequired(), NumberRange(min=0, max=365)])
     submit = SubmitField("Submit")
     
+
+def db_get_commission(start_date, date_range):
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    print(session['email'])
+    if start_date!="date(now())":
+        cursor.execute("call viewMyCommissionNotDefault(%s, %s, %s, @totalAmount, @averageCommission, @totalTicket)", (session['email'], start_date, date_range))
+    else:
+        cursor.execute("call viewMyCommissionNotDefault(%s, date(now()), 30, @totalAmount, @averageCommission, @totalTicket)", (session['email'],))
+    cursor.execute("select @totalAmount;")
+    total_amount = cursor.fetchone()[0]
+    if total_amount != None:
+        total_amount = float(total_amount)
+    else:
+        total_amount = 0
+        
+    cursor.execute("select @averageCommission;")
+    average_commission = cursor.fetchone()[0]
+    if average_commission != None:
+        average_commission = float(average_commission)
+    else:
+        average_commission = 0
+    cursor.execute("select @totalTicket;")
+    total_ticket = cursor.fetchone()[0]
+    if total_ticket != None:
+        total_ticket = int(total_ticket)
+    else:
+        total_ticket = 0
+    print(total_amount, average_commission, total_ticket)
+    cursor.close()
+    return tuple([total_amount, average_commission, total_ticket])
+
 @app.route("/agent_commission", methods = ["GET", "POST"])
 def agent_commission():
     if session['role'] != "booking_agent" or not session['email']:
@@ -410,19 +444,18 @@ def agent_commission():
         return redirect("/login")
     form = CommissionForm()
     if request.method == "GET":
-        conn.reconnect()
-        cursor = conn.cursor(prepared=True)
-        print(session['email'])
-        cursor.execute("call viewMyCommissionNotDefault(%s, date(now()), 30, @totalAmount, @averageCommission, @totalTicket)", (session['email'], ))
-        cursor.execute("select @totalAmount;")
-        total_amount = float(cursor.fetchone()[0])
-        cursor.execute("select @averageCommission;")
-        average_commission = float(cursor.fetchone()[0])
-        cursor.execute("select @totalTicket;")
-        total_ticket = int(cursor.fetchone()[0])
-        print(total_amount, average_commission, total_ticket)
+        total_amount, average_commission, total_ticket = db_get_commission("date(now())", 30)
         return render_template("agent_commission.html", total_amount = total_amount, average_commission = average_commission, total_ticket = total_ticket, form = form)
-    
+    elif request.method == "POST":
+        if form.validate_on_submit():
+            start_date = form.start_date.data
+            print(type(start_date), start_date)
+            date_range = form.date_range.data
+            print(type(date_range), date_range)
+        total_amount, average_commission, total_ticket = db_get_commission(start_date, date_range)
+        return render_template("agent_commission.html", total_amount = total_amount, average_commission = average_commission, total_ticket = total_ticket, form = form)
+
+
         
     
 @app.route('/logout')
