@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, url_for, redirect, session, f
 import mysql.connector
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DateField, SelectField, IntegerField
+from wtforms import StringField, SubmitField, DateField, SelectField, IntegerField, PasswordField
 from wtforms.validators import DataRequired, Email, NumberRange
 
 app = Flask(__name__)
@@ -67,6 +67,34 @@ def agent_register():
             cursor.close()
             print('done inserting')
             return redirect('/publicinfo')
+        
+# USE WTFORMS TO futher enhance the validation process
+class StaffRegisterForm(FlaskForm):
+    def get_airlines():
+        stmt ="select * from airline;"
+        conn.reconnect()
+        cursor = conn.cursor()
+        cursor.execute(stmt)
+        airlines = cursor.fetchall()
+        for i in range(len(airlines)):
+            airlines[i] = (airlines[i][0], airlines[i][0])
+        print(airlines)
+        cursor.close()
+        return airlines
+    user_name = StringField("Username (HAS TO BE UNIQUE)", validators=[DataRequired()])
+    password = PasswordField("Simple Password is Enough", validators=[DataRequired()])
+    first_name = StringField("First Name", validators=[DataRequired()])
+    last_name = StringField("Last Name", validators=[DataRequired()])
+    date_of_birth = DateField("Date Of Birth", validators=[DataRequired()])
+    airline_name = SelectField("Airline You Work For", choices=get_airlines(), validators=[DataRequired()])
+    submit = SubmitField("Submit")
+        
+@app.route("/staff_register", methods = ["GET", "POST"])
+def staff_register():
+    form = StaffRegisterForm()
+    if request.method == "GET":
+        return render_template("staff_register.html", form = form)
+    
         
     
 @app.route('/customer_register', methods = ['POST', 'GET'])
