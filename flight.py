@@ -195,6 +195,7 @@ def login():
         role = request.form.get('roles')
         email = request.form.get('email')
         password = request.form.get('password')
+        conn.reconnect()
         cursor=conn.cursor()
         if role != "airline_staff":
             query="select * from {} where email='{}' and password=md5('{}');"
@@ -522,6 +523,7 @@ def staff_view_flights():
         flash("Please Login First")
         return redirect("/login")
     airline_name = get_staff_airline()
+    airport_city = get_airport_city()
     if request.method == "GET":
         conn.reconnect()
         cursor = conn.cursor(prepared=True)
@@ -529,7 +531,41 @@ def staff_view_flights():
         upcoming = cursor.fetchall()
         cursor.close()
         print(upcoming)
-        return render_template("staff_view_flights.html", upcoming = upcoming, username = session["email"])
+        return render_template("staff_view_flights.html", upcoming = upcoming, username = session["email"], airport_city = airport_city)
+    elif request.method == "POST":
+        source_city = request.form.get("depart")
+        destination_city = request.form.get("arrive")
+        start_date = request.form.get("start_date")
+        end_date = request.form.get("end_date")
+        if source_city and destination_city and start_date and end_date:
+            conn.reconnect()
+            cursor = conn.cursor(prepared=True)
+            cursor.execute("call staff_view_flights_date_city(%s, %s, %s, %s, %s);", (airline_name,start_date, end_date, source_city, destination_city))
+            upcoming = cursor.fetchall()
+            cursor.close()
+            print(upcoming)
+            return render_template("staff_view_flights.html", upcoming = upcoming, username = session["email"], airport_city = airport_city)
+        elif source_city and destination_city:
+            conn.reconnect()
+            cursor = conn.cursor(prepared=True)
+            cursor.execute("call staff_view_flights_city(%s, %s, %s);", (airline_name,source_city, destination_city))
+            upcoming = cursor.fetchall()
+            cursor.close()
+            print(upcoming)
+            return render_template("staff_view_flights.html", upcoming = upcoming, username = session["email"], airport_city = airport_city)
+        elif start_date and end_date:
+            conn.reconnect()
+            cursor = conn.cursor(prepared=True)
+            cursor.execute("call staff_view_flights_date(%s, %s, %s);", (airline_name,start_date, end_date))
+            upcoming = cursor.fetchall()
+            cursor.close()
+            print(upcoming)
+            return render_template("staff_view_flights.html", upcoming = upcoming, username = session["email"], airport_city = airport_city)
+        else:
+            return redirect('/staff_view_flights')
+            
+            
+            
 
     
 

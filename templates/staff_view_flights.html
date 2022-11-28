@@ -84,6 +84,35 @@
             </tr>
             {%endfor%}
         </table>
-        
+
+        <div class="text-bg-light p-3">
+        <form method="POST" action="/staff_view_flights">
+            <div class="mb-3">
+            <label for="depart">Depart From </label>
+            <select class="form-select" name="depart" id="depart">
+                {% for row in airport_city %}
+                <option value="{{row[0]}}">{{row[0]}}/{{row[1]}}</option>
+                {%endfor%}
+            </select>
+            </div>
+            <div class="mb-3">
+            <label for="arrive">Arrive In</label>
+            <select class="form-select" name="arrive" id="arrive">
+                {% for row in airport_city %}
+                <option value="{{row[0]}}">{{row[0]}}/{{row[1]}}</option>
+                {%endfor%}
+            </select>
+            </div>
+            <div class="mb-3">
+            <label for="start_date">Start Date <span style="color: red;">(Leave Blank to See All Upcoming)</span></label>
+            <input type="date" name="start_date">
+            </div>
+            <div class="mb-3">
+            <label for="end_date">End Date <span style="color: red;">(Leave Blank to See All Upcoming)</span></label>
+            <input type="date" name="end_date">
+            </div>
+            <input class="btn btn-success" type="submit" name="submit">
+        </form>
+        </div>
     </body>
 </html>
