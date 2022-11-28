@@ -32,6 +32,8 @@
     {%if request.args.get('error')%}
     <h1>Login Unsuccessful, wrong username or password</h1>
     {%endif%}
+    <div style="padding: 20px;">
+
     <form action="/login" method="POST">
         <h5>  Choose Your <span class="badge bg-secondary">Role</span></h5>
         <select name="roles" class="form-select" aria-label="Default select example">
@@ -41,7 +43,7 @@
         </select>
     </br>
         <div class="form-floating mb-3">
-            <input type="email" name="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+            <input type="text" name="email" class="form-control" id="floatingInput" placeholder="name@example.com">
             <label for="floatingInput">Email address</label>
         </div>
         <!-- <b>email</b><input type="email" name="email" placeholder="yy4108@nyu.edu"></br> -->
@@ -51,9 +53,12 @@
         </div>
         <!-- <b>password</b><input type="password" name="password"></br> -->
         <div class="mx-auto" style="width: 200px;">
-        <input class="btn btn-primary" type="submit" value="Login">
+        <input class="btn btn-success" type="submit" value="Login">
         </div>
     </form>
+
+    </div>
+    
     
 </body>
 </html>

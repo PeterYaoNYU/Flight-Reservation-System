@@ -196,7 +196,10 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
         cursor=conn.cursor()
-        query="select * from {} where email='{}' and password=md5('{}');"
+        if role != "airline_staff":
+            query="select * from {} where email='{}' and password=md5('{}');"
+        else:
+            query = "select * from {} where username='{}' and password=md5('{}');"
         cursor.execute(query.format(role, email, password))
         result = cursor.fetchall()
         if not result:
@@ -211,6 +214,9 @@ def login():
         
 @app.route('/home', methods=['GET', 'POST'])
 def home():
+    if "role" not in session:
+        flash("login first")
+        return redirect("/login")
     role = session['role']
     email = session['email']
     cursor=conn.cursor()
@@ -273,7 +279,7 @@ def home():
     elif role=='booking_agent':
         return redirect("/agent_home")
     elif role=='airline_staff':
-        return "under construction for airline_staff"
+        return redirect("/staff_home")
     
 # ******************************************************************
 # ******************************************************************
@@ -472,8 +478,61 @@ def agent_top_customers():
     print(based_on_money)
     return render_template("agent_top_customers.html", based_on_ticket = based_on_ticket, based_on_money = based_on_money)
 
-        
+# ******************************************************************
+# ******************************************************************
+# Airline Staff View Functions Start Here
+# ******************************************************************
+# ******************************************************************
+def check_staff_validity():
+    if "role" in session and session["role"] == "airline_staff":
+        return True
+    else:
+        return False
+
+def get_airport_city():
+    stmt = "select * from airport;"
+    conn.reconnect()
+    cursor = conn.cursor()
+    cursor.execute(stmt)
+    airport_city = cursor.fetchall()
+    cursor.close()
+    return airport_city
+
+def get_staff_airline():
+    stmt = "select airline_name from airline_staff where username = %s;"
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute(stmt, (session["email"], ))
+    airline_name = cursor.fetchone()
+    print(airline_name)
+    cursor.close()
+    return airline_name[0]
+
+@app.route('/staff_home', methods = ["GET", ])
+def staff_home():
+    if "role" in session and session["role"]=="airline_staff":
+        return render_template("staff_home.html", staff_email = session['email'])
+    else:
+        flash("Must Log In First Before Accessing the Staff Homepage!")
+        return redirect("/login")
     
+@app.route('/staff_view_flights', methods =["GET", "POST"])
+def staff_view_flights():
+    if not check_staff_validity():
+        flash("Please Login First")
+        return redirect("/login")
+    airline_name = get_staff_airline()
+    if request.method == "GET":
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        cursor.execute("call staff_view_flights_default(%s);", (airline_name, ))
+        upcoming = cursor.fetchall()
+        cursor.close()
+        print(upcoming)
+        return render_template("staff_view_flights.html", upcoming = upcoming, username = session["email"])
+
+    
+
 @app.route('/logout')
 def logout():
     session.pop('role')

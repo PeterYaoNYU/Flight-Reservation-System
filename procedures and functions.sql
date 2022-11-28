@@ -225,3 +225,32 @@ begin
     limit 5;
 end//
 delimiter ;
+
+delimiter //
+create procedure staff_view_flights_default (
+    in airlineName varchar(30)
+)
+begin
+    select airline_name, flight_num, departure_time, arrival_time, price, status, airplane_id, concat(arrive_airport, '/', (select city from airport where name = arrive_airport)), concat(depart_airport, '/', (select city from airport where name = depart_airport))
+    from flight
+    where airline_name = airlineName and departure_time between now() and date_add(now(), interval 30 day);
+end//
+delimiter ;
+
+
+delimiter //
+create procedure staff_view_flights_default (
+    in airlineName  varchar(30)
+    in startDate    date
+    in endDate      date
+)
+begin
+    select airline_name, flight_num, departure_time, arrival_time, price, status, airplane_id, concat(arrive_airport, '/', (select city from airport where name = arrive_airport)), concat(depart_airport, '/', (select city from airport where name = depart_airport))
+    from flight
+    where airline_name = airlineName and departure_time between startDate and endDate;
+end//
+delimiter ;
+
+
+
+
