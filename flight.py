@@ -19,7 +19,10 @@ def hello():
         return redirect("/home")
     else:
         return render_template('index.html')
-
+    
+@app.route("/register")
+def register():
+    return render_template("register.html")
 
 @app.route('/publicinfo', methods = ['POST', 'GET'])
 def publicinfo():
@@ -564,10 +567,14 @@ def staff_view_flights():
         else:
             return redirect('/staff_view_flights')
             
-            
+# @app.route("/reate_new_flights", methods = ["GET", "POST"])
+# def staff_create_new_flights():
+    
             
 
     
+
+
 
 @app.route('/logout')
 def logout():

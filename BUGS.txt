@@ -6,3 +6,5 @@
 3. agent buy for which customer? (solved)
 
 4. agent view top customers bar chart
+
+5. public info query is shit!!!!
