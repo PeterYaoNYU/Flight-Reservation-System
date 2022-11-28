@@ -237,11 +237,10 @@ begin
 end//
 delimiter ;
 
-
 delimiter //
-create procedure staff_view_flights_default (
-    in airlineName  varchar(30)
-    in startDate    date
+create procedure staff_view_flights_date (
+    in airlineName  varchar(30),
+    in startDate    date,
     in endDate      date
 )
 begin
@@ -251,6 +250,31 @@ begin
 end//
 delimiter ;
 
+delimiter //
+create procedure staff_view_flights_city (
+    in airlineName  varchar(30),
+    in sourceCity   varchar(30),
+    in destinationCity  varchar(30)
+)
+begin
+    select airline_name, flight_num, departure_time, arrival_time, price, status, airplane_id, concat(arrive_airport, '/', (select city from airport where name = arrive_airport)), concat(depart_airport, '/', (select city from airport where name = depart_airport))
+    from flight
+    where airline_name = airlineName and depart_airport = sourceCity and arrive_airport = destinationCity and departure_time > now();
+end//
+delimiter ;
 
 
-
+delimiter //
+create procedure staff_view_flights_date_city (
+    in airlineName  varchar(30),
+    in startDate    date,
+    in endDate      date,
+    in sourceCity   varchar(30),
+    in destinationCity  varchar(30)
+)
+begin
+    select airline_name, flight_num, departure_time, arrival_time, price, status, airplane_id, concat(arrive_airport, '/', (select city from airport where name = arrive_airport)), concat(depart_airport, '/', (select city from airport where name = depart_airport))
+    from flight
+    where airline_name = airlineName and depart_airport = sourceCity and arrive_airport = destinationCity and date(departure_time) between startDate and endDate;
+end//
+delimiter ;
