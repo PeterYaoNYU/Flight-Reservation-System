@@ -24,6 +24,21 @@ def hello():
 def register():
     return render_template("register.html")
 
+# used in the registration process
+# return true if there is already duplicate in the database
+# return false if the entry is unique and new 
+def check_duplicate(role, pk):
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call check_duplicate(%s, %s);", (role, pk))
+    result = cursor.fetchall()
+    cursor.close()
+    print(result)
+    if len(result) > 0:
+        return True
+    else:
+        return False
+
 @app.route('/publicinfo', methods = ['POST', 'GET'])
 def publicinfo():
     if request.method == 'GET':
@@ -32,8 +47,8 @@ def publicinfo():
         arrival_city = request.form.get('arrival_city')
         departure_city = request.form.get('departure_city')
         departure_date = request.form.get('departure_date')
-        
         data_public = None
+        conn.reconnect()
         cursor = conn.cursor()
         query = "select * from flight where arrive_airport = '{}' and depart_airport='{}' and date(departure_time) = '{}'"
         cursor.execute(query.format(departure_city, arrival_city, departure_date))
@@ -60,6 +75,7 @@ def agent_register():
             error = 'Agent Exists'
             return redirect('/agent_register?error=%s' % error)
         else:
+            conn.reconnect()
             cursor = conn.cursor()
             insert_query = "insert into booking_agent values ('{}', md5('{}'), {});"
             cursor.execute(insert_query.format(email, password, booking_agent_id));
@@ -94,6 +110,29 @@ def staff_register():
     form = StaffRegisterForm()
     if request.method == "GET":
         return render_template("staff_register.html", form = form)
+    elif request.method == "POST":
+        if form.validate_on_submit():
+            user_name = form.user_name.data
+            form.user_name.data = ''
+            password = form.password.data
+            form.password.data = ''
+            first_name = form.first_name.data
+            form.first_name.data = ''
+            last_name = form.last_name.data
+            form.last_name.data = ''
+            date_of_birth = form.date_of_birth.data
+            form.date_of_birth.data = ''
+            airline_name = form.airline_name.data
+            form.airline_name.data = ''
+        if check_duplicate("airline_staff", user_name):
+            flash("Staff Already Existes!")
+            return redirect("/register")
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        cursor.execute("call insert_new_staff(%s,%s,%s,%s,%s,%s);", (user_name, password, first_name, last_name, date_of_birth, airline_name))
+        conn.commit()
+        cursor.close()
+        return redirect("/login")
     
         
     
@@ -154,6 +193,7 @@ def purchase():
         print(arrive)
         depart_date = request.form.get('depart_date')
         print(depart_date)
+        conn.reconnect()
         # need to make sure that we only get flights with available seats left
         # could be optimized into a procedure or a function later!!!
         purchase_query = "with avail_airplane_id as(\
@@ -187,6 +227,7 @@ def purchase_confirm(flight_num):
     if request.method == 'GET':
         # find name of the customer to provide welcome
         name = findname()
+        conn.reconnect()
         cursor = conn.cursor()
         confirmation_query = "select * from flight where flight_num = '{}';"
         cursor.execute(confirmation_query.format(flight_num))
@@ -197,6 +238,7 @@ def purchase_confirm(flight_num):
     # the user has clicked the button, put a ticket into the db,
     # flash a message and redirect the user back to the homepage
     elif request.method == 'POST':
+        conn.reconnect()
         cursor = conn.cursor()
         # get the unique ticket_id by finding out the current max and then plus one
         max_query = "select max(ticket_id) from ticket;"
@@ -251,6 +293,7 @@ def home():
         return redirect("/login")
     role = session['role']
     email = session['email']
+    conn.reconnect()
     cursor=conn.cursor()
     if role=='customer':
         # fetch the name of the customer so that we can greet them on their homepage
@@ -337,6 +380,7 @@ def agent_view_flight():
         # query all the upcoming flights and push them to the webpage
         agent_email = session["email"]
         upcoming_query = "select airline_name, flight_num, customer_email, ticket_id, departure_time, arrival_time, price, arrive_airport, (select city from airport a1 where a1.name=arrive_airport) as arrive_city, depart_airport, (select city from airport a2 where a2.name = depart_airport) as depart_city from ticket natural join flight where ticket.booking_agent_email='{}' and departure_time>=NOW() order by departure_time ASC;"
+        conn.reconnect()
         cursor = conn.cursor()
         cursor.execute(upcoming_query.format(agent_email))
         upcoming_flights = cursor.fetchall()
@@ -611,6 +655,7 @@ def logout():
     return redirect('/login')
 
 def findname():
+    conn.reconnect()
     cursor = conn.cursor()
     name_query = "select name from customer where email = '{}';"
     cursor.execute(name_query.format(session['email']))
@@ -619,6 +664,7 @@ def findname():
     return name[0]
 
 def get_airline_name(flight_num):
+    conn.reconnect()
     cursor = conn.cursor()
     name_query = "select airline_name from flight where flight_num = '{}';"
     cursor.execute(name_query.format(flight_num))

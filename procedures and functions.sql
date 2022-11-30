@@ -278,3 +278,33 @@ begin
     where airline_name = airlineName and depart_airport = sourceCity and arrive_airport = destinationCity and date(departure_time) between startDate and endDate;
 end//
 delimiter ;
+
+delimiter //
+create procedure insert_new_staff(
+    in username    varchar(30), 
+    in password     varchar(32),
+    in first_name   varchar(15),
+    in last_name    varchar(15),
+    in date_of_birth    date,
+    in airline_name varchar(30)
+)
+begin
+    insert into airline_staff(username, password, first_name, last_name, date_of_birth, airline_name) values(username, md5(password), first_name, last_name, date_of_birth, airline_name);
+end//
+delimiter ;
+
+delimiter //
+create procedure check_duplicate(
+    in role varchar(30),
+    in pk   varchar(30)
+)
+begin
+    if role = "airline_staff" then
+        select * from airline_staff where username = pk;
+    elseif role = "customer" then
+        select * from customer where email = pk;
+    else
+        select * from booking_agent where email = pk;
+    end if;
+end//
+delimiter ;
