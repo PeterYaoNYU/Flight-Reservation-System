@@ -701,11 +701,16 @@ def change_flight_status():
     flight_numbers = get_flight_num(airline_name)
     if request.method == "GET":
         return render_template("change_status.html", all_flights = all_flights, flight_numbers = flight_numbers)
-    
-    
-    
-    
-    
+    elif request.method == "POST":
+        flight_num_to_update = request.form.get("flight_num")
+        new_status = request.form.get("status")
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        cursor.execute("call update_flight_status(%s, %s, %s);", (airline_name, flight_num_to_update,new_status))
+        conn.commit()
+        cursor.close()
+        flash("Status Update Success")
+        return redirect("/change_status")
     
 # this function allows staff with admin permit to add new flights to the system
 # !!!! only to the company that he worked for 

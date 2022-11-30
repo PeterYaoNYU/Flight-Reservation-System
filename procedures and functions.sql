@@ -346,3 +346,16 @@ begin
     where airline_name = airlineName and flight_num = flightNum;
 end//
 delimiter ;
+
+delimiter //
+create procedure update_flight_status(
+    in airlineName     varchar(30),
+    in flightNum       varchar(30),
+    in new_status           varchar(30)
+)
+begin
+    update flight
+    set status = new_status
+    where airline_name = airlineName and flight_num = flightNum;
+end//
+delimiter;
