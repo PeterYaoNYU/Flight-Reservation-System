@@ -308,3 +308,41 @@ begin
     end if;
 end//
 delimiter ;
+
+
+delimiter //
+CREATE procedure check_staff_role(
+    in user_name     varchar(30),
+    in role         varchar(30)
+)
+begin
+    select username
+    from staff_permission
+    where username = user_name and permit_to_do = role;
+end //
+delimiter ;
+
+
+
+delimiter //
+create procedure get_airline_airplane(
+    in airline  varchar(30)
+)
+begin
+    select id, seats
+    from airplane
+    where airline_name = airline;
+end//
+delimiter ;
+
+delimiter //
+create procedure check_duplicate_flight(
+    in airlineName     varchar(30),
+    in flightNum       varchar(30)
+)
+begin
+    select *
+    from flight
+    where airline_name = airlineName and flight_num = flightNum;
+end//
+delimiter ;

@@ -638,15 +638,86 @@ def staff_view_flights():
             return render_template("staff_view_flights.html", upcoming = upcoming, username = session["email"], airport_city = airport_city)
         else:
             return redirect('/staff_view_flights')
-            
-# @app.route("/reate_new_flights", methods = ["GET", "POST"])
-# def staff_create_new_flights():
+        
+# check if the staff role matches the expectation 
+def check_staff_role(role):
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call check_staff_role(%s, %s);", (session['email'], "admin"))
+    result = cursor.fetchall()
+    print(result)
+    if len(result) == 0:
+        return False
+    else:
+        return True
     
-            
+def get_airline_airplane(airline_name):
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call get_airline_airplane(%s);", (airline_name, ))
+    result = cursor.fetchall()
+    cursor.close()
+    return result
 
+# check if there is already duplicate flight in the db
+# return true if there is duplicate 
+# return false otherwise
+def check_duplicate_flight(airline_name, flight_num):
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call check_duplicate_flight(%s, %s);", (airline_name, flight_num))
+    result = cursor.fetchall()
+    if result:
+        return True
+    else:
+        return False
     
-
-
+@app.route("/create_new_flights", methods = ["GET", "POST"])
+def staff_create_new_flights():
+    if not check_staff_validity():
+        flash ("Login Required")
+        return redirect("/login")
+    if not check_staff_role("admin"):
+        flash ("admin required")
+        return redirect("/home")
+    airport_city = get_airport_city()
+    airline_name = get_staff_airline()
+    airplanes = get_airline_airplane(airline_name)
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call staff_view_flights_default(%s);", (airline_name, ))
+    upcoming = cursor.fetchall()
+    cursor.close()
+    print(upcoming)
+    if request.method == "GET":
+        return render_template("staff_create_new_flights.html", airport_city = airport_city, airline_name = airline_name, upcoming = upcoming, airplanes = airplanes)  
+    elif request.method == "POST":
+        print("form data", request.form)
+        # get all the needed data from html form 
+        flight_num = request.form.get("flight_num")
+        departure_time = request.form.get("departure_date") + " "+request.form.get("departure_time")
+        arrival_time = request.form.get("arrival_date") + " "+request.form.get("arrival_time")
+        price = request.form.get("price")
+        status = request.form.get("status")
+        airplane_id = request.form.get("airplane_id")
+        arrive_airport = request.form.get("arrive")
+        depart_airport = request.form.get("depart")
+        # check if all the required fields are filled in
+        if not (flight_num and departure_time and arrival_time and price and status and airplane_id and arrive_airport and depart_airport):
+            flash("Input Incomplete")
+            return redirect("/create_new_flights")
+        # check if the flight already exists in the db!
+        if check_duplicate_flight(airline_name, flight_num):
+            flash("duplicate flight already existing!", "error")
+            return redirect("/create_new_flights")
+        # start writing to the table
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        cursor.execute("insert into flight values(%s, %s, %s, %s,%s, %s, %s, %s, %s );", (airline_name, flight_num, departure_time, arrival_time, price, status, airplane_id, arrive_airport, depart_airport))
+        conn.commit()
+        flash("Success Create New Flight")
+        return redirect("/create_new_flights")
+        
 
 @app.route('/logout')
 def logout():
