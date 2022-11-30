@@ -672,6 +672,43 @@ def check_duplicate_flight(airline_name, flight_num):
     else:
         return False
     
+def get_flight_num(airline_name):
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    stmt = "select flight_num from flight where airline_name = %s;"
+    cursor.execute(stmt, (airline_name, ))
+    result = cursor.fetchall()
+    cursor.close()
+    print(result)
+    return result
+   
+@app.route("/change_status", methods = ["GET", "POST"])
+def change_flight_status():
+    if not check_staff_validity():
+        flash("Only Staff Can Access")
+        return redirect("/login")
+    # make sure the person accessing this page has operator permission
+    if not check_staff_role("operator"):
+        flash("Only Operator Has Permission to Change Status")
+        return redirect("/home")
+    airline_name = get_staff_airline()
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call staff_view_flights_date(%s, %s, %s);", (airline_name, "1999-01-01", "2999-01-01"))
+    all_flights = cursor.fetchall()
+    cursor.close()
+    print(all_flights)
+    flight_numbers = get_flight_num(airline_name)
+    if request.method == "GET":
+        return render_template("change_status.html", all_flights = all_flights, flight_numbers = flight_numbers)
+    
+    
+    
+    
+    
+    
+# this function allows staff with admin permit to add new flights to the system
+# !!!! only to the company that he worked for 
 @app.route("/create_new_flights", methods = ["GET", "POST"])
 def staff_create_new_flights():
     if not check_staff_validity():
