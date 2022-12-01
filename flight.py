@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, url_for, redirect, session, f
 import mysql.connector
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DateField, SelectField, IntegerField, PasswordField
+from wtforms import StringField, SubmitField, DateField, SelectField, IntegerField, PasswordField, EmailField
 from wtforms.validators import DataRequired, Email, NumberRange
 
 app = Flask(__name__)
@@ -84,6 +84,21 @@ def agent_register():
             print('done inserting')
             return redirect('/publicinfo')
         
+class CustomerRegistrationForm(FlaskForm):
+    email = EmailField("Email", validators=[DataRequired()])
+    name = StringField("Name", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    building_number = IntegerField("Building Number", validators=[DataRequired()])
+    street = StringField("Street Name", validators=[DataRequired()])
+    city = StringField("City", validators=[DataRequired()])
+    state = StringField("State/Province", validators=[DataRequired()])
+    phone_number = IntegerField("Phone Number", validators=[DataRequired()])
+    passport_number = StringField("Passport Number", validators=[DataRequired()])
+    passport_expiration = DateField("Passport Expiration", validators= [DataRequired()])
+    passport_country = StringField("Passport Country", validators=[DataRequired()])
+    date_of_birth = DateField("Date Of Birth", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+        
 # USE WTFORMS TO futher enhance the validation process
 class StaffRegisterForm(FlaskForm):
     def get_airlines():
@@ -138,33 +153,38 @@ def staff_register():
     
 @app.route('/customer_register', methods = ['POST', 'GET'])
 def customer_register():
-    if request.method == 'GET':
-        return render_template('user_register.html')
-    if request.method == 'POST':
-        email=request.form.get('email')
-        check_exist_query="select email from customer where email = '{}'"
-        cursor= conn.cursor()
-        cursor.execute(check_exist_query.format(email))
-        existed_user = cursor.fetchone()
-        if (existed_user):
-            error = 'Customer Already Exists'
-            cursor.close()
-            render_template('user_register.html', error=error)
-        else:
-            name=request.form.get('name')
-            password=request.form.get('password')
-            building_number=request.form.get('building_number')
-            street=request.form.get('streer')
-            city = request.form.get('city')
-            state=request.form.get('state')
-            phone_number=request.form.get('phone_number')
-            passport_number=request.form.get('passport_number')
-            passport_expiration=request.form.get('passport_expiration')
-            passport_country=request.form.get('passport_country')
-            date_of_birth=request.form.get('date_of_birth')
-            insert_query = "insert into customer values '{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}'"
-            cursor.execute(insert_query.format(name, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth))
-            cursor.close()
+    form = CustomerRegistrationForm()
+    if request.method == "GET":
+        return render_template("customer_register.html", form = form)
+    if request.method =="POST":
+        if form.validate_on_submit():
+            email = form.email.data
+            name = form.name.data
+            password = form.password.data
+            building_number = form.building_number.data
+            street = form.street.data
+            city = form.city.data
+            state = form.state.data
+            phone_number = form.phone_number.data
+            passport_number = form.passport_number.data
+            passport_expiration = form.passport_expiration.data
+            passport_country = form.passport_country.data
+            date_of_birth = form.date_of_birth.data
+        # use the helper function to check if there is duplicate in the db 
+        if check_duplicate("customer", email):
+            # there is indeed duplicate customer 
+            flash("Customer Already Existing!")
+            return redirect("/register")
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        cursor.execute("insert into customer values (%s,%s,md5(%s),%s,%s,%s,%s,%s,%s,%s,%s,%s);", (email, name, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth))
+        conn.commit()
+        flash("Registration Complete")
+        return redirect("/login")
+    
+        
+            
+        
             
 @app.route('/purchase', methods=['POST', 'GET'])
 def purchase():
