@@ -796,13 +796,14 @@ def staff_create_new_flights():
 class NewAirportForm(FlaskForm):
     name = StringField("Airport Name (6 Characters MAX)", [DataRequired(), length(max=6)])
     city = StringField("CityName (20 Characters Max)", validators=[DataRequired(), length(max=20)])
+    submit = SubmitField()
     
 # check if there is duplicate airport in the system, 
 # returns true if there is duplicate
 def check_duplicate_airport(airport_name):
     conn.reconnect()
     cursor = conn.cursor(prepared=True)
-    cursor.execute("call check_duplicate_airport(%s);", airport_name)
+    cursor.execute("call check_duplicate_airport(%s);", (airport_name, ))
     result = cursor.fetchall()
     cursor.close()
     if result:
