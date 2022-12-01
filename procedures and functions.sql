@@ -359,3 +359,12 @@ begin
     where airline_name = airlineName and flight_num = flightNum;
 end//
 delimiter ;
+
+delimiter //
+create procedure check_duplicate_airport(
+    in airport_name varchar(6)
+)
+begin
+    select * from airport where name = airport_name;
+end//
+delimiter ;

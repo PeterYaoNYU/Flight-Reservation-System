@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, url_for, redirect, session, f
 import mysql.connector
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DateField, SelectField, IntegerField, PasswordField, EmailField
+from wtforms import StringField, SubmitField, DateField, SelectField, IntegerField, PasswordField, EmailField, ValidationError
 from wtforms.validators import DataRequired, Email, NumberRange
 
 app = Flask(__name__)
@@ -23,6 +23,19 @@ def hello():
 @app.route("/register")
 def register():
     return render_template("register.html")
+
+# enforece the length requirement
+# a validator for the form
+# easily reusable 
+def length(min=-1, max=-1):
+    message = 'Must be between %d and %d characters long.' % (min, max)
+
+    def _length(form, field):
+        l = field.data and len(field.data) or 0
+        if l < min or max != -1 and l > max:
+            raise ValidationError(message)
+
+    return _length
 
 # used in the registration process
 # return true if there is already duplicate in the database
@@ -779,6 +792,55 @@ def staff_create_new_flights():
         conn.commit()
         flash("Success Create New Flight")
         return redirect("/create_new_flights")
+    
+class NewAirportForm(FlaskForm):
+    name = StringField("Airport Name (6 Characters MAX)", [DataRequired(), length(max=6)])
+    city = StringField("CityName (20 Characters Max)", validators=[DataRequired(), length(max=20)])
+    
+# check if there is duplicate airport in the system, 
+# returns true if there is duplicate
+def check_duplicate_airport(airport_name):
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call check_duplicate_airport(%s);", airport_name)
+    result = cursor.fetchall()
+    cursor.close()
+    if result:
+        return True
+    else:
+        return False
+
+@app.route("/add_new_airport", methods = ["GET", "POST"])
+def add_new_airport():
+    # check if the user is indeed staff AND admin
+    if not check_staff_validity():
+        flash ("Login Required")
+        return redirect("/login")
+    if not check_staff_role("admin"):
+        flash ("admin required")
+        return redirect("/home")
+    airport_city = get_airport_city()
+    form =NewAirportForm()
+    if request.method == "GET":
+        return render_template("add_new_airport.html", form = form, airport_city = airport_city)
+    if request.method == "POST":
+        if form.validate_on_submit():
+            name = form.name.data
+            city = form.city.data
+            if check_duplicate_airport(name):
+                flash("Airport Already Exists!")
+                return redirect("/add_new_airport")
+            conn.reconnect()
+            cursor = conn.cursor(prepared=True)
+            cursor.execute("insert into airport values (%s, %s);", (name, city))
+            conn.commit()
+            cursor.close()
+            flash("Success Adding Planes")
+            return redirect("/home")
+        else:
+            flash("Input Error, Check Your Form")
+            return redirect("/add_new_airport")
+        
         
 
 @app.route('/logout')
