@@ -417,4 +417,16 @@ begin
 end //
 delimiter ;
 
+delimiter //
+create procedure avail_booking_agent(
+    in airlineName  varchar(30)
+)
+begin
+    select b.email from booking_agent b where b.email not in (
+        select booking_agent_email
+        from works_for
+        where airline_name = airlineName
+    ) ;
+end//
+delimiter ;
 

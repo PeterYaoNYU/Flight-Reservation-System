@@ -623,11 +623,41 @@ def get_staff_airline():
     return airline_name[0]
 
 # ******************************************************************
+# Add New Airplane (admin)
+# ******************************************************************
+def get_avail_booking_agent(airline_name):
+    stmt = "call avail_booking_agent(%s);"
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute(stmt, (airline_name,))
+    result = cursor.fetchall()
+    return result
+
+@app.route("/add_booking_agent", methods = ["GET", "POST"])
+def add_booking_agent():
+    # first check if the user is authorized to do this!
+    if not check_staff_validity():
+        flash("Only Staff Can Access")
+        return redirect("/login")
+    # make sure the person accessing this page has admin permission
+    if not check_staff_role("admin"):
+        flash("Only Admin Has Permission to Change Status")
+        return redirect("/home")
+    airline_name = get_staff_airline()
+    avail_booking_agent = get_avail_booking_agent(airline_name)
+    if request.method== "GET":
+        return render_template("add_booking_agent.html", airline_name = airline_name, avail_booking_agent = avail_booking_agent)
+    
+        
+        
+
+
+
+# ******************************************************************
 # view top 5 booking agents (all staff)
 # ******************************************************************
 @app.route("/view_booking_agent")
 def view_booking_agent():
-    print("shit")
     # first check if the user is authorized to do this!
     if not check_staff_validity():
         flash("Only Staff Can Access")
