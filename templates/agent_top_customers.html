@@ -43,6 +43,7 @@
           <div class="container text-left" style="padding: 20px;">
             <div class="row">
               <div class="col">
+                <h3 style="color: deepskyblue;">Top 5 Customers Based On #Tickets past 6 months</h3>
                 <ol class="list-group list-group-numbered">
                     {%for row in based_on_ticket%}
                     <li class="list-group-item">{{row[0]}} <span class="badge bg-primary rounded-pill">{{row[2]}} tickets</span></li>
@@ -50,6 +51,7 @@
                 </ol>
               </div>
               <div class="col">
+                <h3 style="color: deepskyblue;">Top 5 Customers Based On $Commission Last Year</h3>
                 <ol class="list-group list-group-numbered">
                     {%for row in based_on_money%}
                     <li class="list-group-item">{{row[0]}} <span class="badge bg-primary rounded-pill">${{row[2]}}</span></li>
