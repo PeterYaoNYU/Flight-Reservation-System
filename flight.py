@@ -203,9 +203,6 @@ def customer_register():
         flash("Registration Complete")
         return redirect("/login")
     
-        
-            
-        
             
 @app.route('/purchase', methods=['POST', 'GET'])
 def purchase():
@@ -624,6 +621,36 @@ def get_staff_airline():
     print(airline_name)
     cursor.close()
     return airline_name[0]
+
+# ******************************************************************
+# view top 5 booking agents (all staff)
+# ******************************************************************
+app.route("/view_booking_agent", method = "GET")
+def view_booking_agent():
+    # first check if the user is authorized to do this!
+    if not check_staff_validity():
+        flash("Only Staff Can Access")
+        return redirect("/login")
+    airline_name = get_staff_airline()
+    stmt = "call staff_view_booking_agent(%s, %s, %s);"
+    conn.reconnect;
+    cursor = conn.cursor(prepared=True)
+    # get the top 5 agents based on the number of tickets sold last year
+    cursor.execute(stmt, (airline_name, "ticket", "year"))
+    agents_ticket_year = cursor.fetchall()
+    # get the top 5 agents based on the number of tickets sold last month
+    cursor.execute(stmt, (airline_name, "ticket", "month"))
+    agents_ticket_month = cursor.fetchall()
+    # get the top 5 agents based on the number of tickets sold last month
+    cursor.execute(stmt, (airline_name, "amount", "year"))
+    agents_amount_year = cursor.fetchall()
+    # render the results
+    return render_template("view_booking_agent.html", agents_ticket_month, agents_ticket_year, agents_amount_year)
+
+    
+    
+    
+
 
 # ******************************************************************
 # Add New Airplane (admin)
