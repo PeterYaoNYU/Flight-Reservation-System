@@ -623,6 +623,40 @@ def get_staff_airline():
     return airline_name[0]
 
 # ******************************************************************
+# check top destinations (all)
+# ******************************************************************
+@app.route("/view_top_destinations")
+def view_top_destinations():
+    # first check if the user is authorized to do this!
+    if not check_staff_validity():
+        flash("Only Staff Can Access")
+        return redirect("/login")
+    airline_name = get_staff_airline()
+    
+    # fetch the three most popular destinations in the past 3 months
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call top_destination_3_month(%s);", (airline_name,))
+    three_month = cursor.fetchall()
+    cursor.close()
+    
+    # fetch the three most popular destinations in the last year
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call top_destination_1_year(%s);", (airline_name,))
+    one_year = cursor.fetchall()
+    cursor.close()
+    
+    # render the template with the info 
+    return render_template("view_top_destinations.html", three_month = three_month, one_year = one_year)
+
+    
+
+
+
+
+
+# ******************************************************************
 # Add New Booking Agent (admin)
 # ******************************************************************
 def get_avail_booking_agent(airline_name):
