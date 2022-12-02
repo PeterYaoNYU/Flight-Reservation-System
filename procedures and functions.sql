@@ -368,3 +368,13 @@ begin
     select * from airport where name = airport_name;
 end//
 delimiter ;
+
+delimiter //
+create procedure check_duplicate_airplane(
+    in airlineName  varchar(30),
+    in planeId      int
+)
+begin
+    select id from airplane where airline_name = airlineName and id = planeId;
+end //
+delimiter ;

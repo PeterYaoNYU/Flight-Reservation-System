@@ -3,7 +3,7 @@ import mysql.connector
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, DateField, SelectField, IntegerField, PasswordField, EmailField, ValidationError
-from wtforms.validators import DataRequired, Email, NumberRange
+from wtforms.validators import DataRequired, Email, NumberRange, InputRequired
 
 app = Flask(__name__)
 
@@ -616,6 +616,64 @@ def get_staff_airline():
     print(airline_name)
     cursor.close()
     return airline_name[0]
+
+# ******************************************************************
+# Add New Airplane (admin)
+# ******************************************************************
+
+class NewAirplaneForm(FlaskForm):
+    id = IntegerField("ID of the New Airplane (Duplicate ID Will Be Rejected", validators=[DataRequired(), ])
+    seats = IntegerField("Seats on the Airplane", validators=[DataRequired(), ])
+    submit = SubmitField("Submit", render_kw = {'style': 'margin: 20px;'})
+    
+# return true if there is duplicate flight, false otherwise
+def check_duplicate_plane(airline_name, plane_id):
+    id = None
+    stmt = "call check_duplicate_airplane(%s, %s);"
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute(stmt, (airline_name, plane_id))
+    id = cursor.fetchall()
+    print(id)
+    cursor.close()
+    if id:
+        return True
+    elif not id:
+        return False
+
+@app.route("/add_airplane", methods = ["GET", "POST"])
+def add_airplane():
+    # first check if the user is authorized to do this!
+    if not check_staff_validity():
+        flash("Only Staff Can Access")
+        return redirect("/login")
+    # make sure the person accessing this page has admin permission
+    if not check_staff_role("admin"):
+        flash("Only Admin Has Permission to Change Status")
+        return redirect("/home")
+    airline_name = get_staff_airline()
+    airplane = get_airline_airplane(airline_name)
+    form = NewAirplaneForm()
+    if request.method == "GET":
+        return render_template("add_airplane.html", airline_name = airline_name, airplane = airplane, form = form)
+    if request.method == "POST":
+        if form.validate_on_submit():
+            new_id = form.id.data
+            new_seats = form.seats.data
+            if check_duplicate_plane(airline_name, new_id):
+                flash("This Plane Already Exists")
+                return redirect("/add_airplane")
+            else:
+                stmt = "insert into airplane values(%s, %s, %s);"
+                conn.reconnect()
+                cursor = conn.cursor(prepared=True)
+                cursor.execute(stmt, (airline_name, new_id, new_seats))
+                conn.commit()
+                cursor.close()
+                flash("Successfully Add New Airplanes")
+                return redirect("/add_airplane")
+        return redirect("/add_airplane")
+            
 
 @app.route('/staff_home', methods = ["GET", ])
 def staff_home():

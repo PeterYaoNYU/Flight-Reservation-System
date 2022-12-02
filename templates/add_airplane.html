@@ -58,19 +58,35 @@
           {% if messages %}
             <ul class="list-group">
             {% for category, message in messages %}
-              <li class="list-group-item list-group-item-primary">{{ message }}</li>
+              <li class="list-group-item list-group-item-success">{{ message }}</li>
             {% endfor %}
             </ul>
           {% endif %}
         {% endwith %}
 
+        <h2 style="color: green; padding: 20px;">All Airplanes of {{airline_name}}</h2>
+
+        <table class="table table-striped">
+            <tr class="table-success">
+                <th>Plane ID</th>
+                <th>Seats</th>
+            </tr>
+            {%for row in airplane%}
+            <tr>
+                    {%for i in range(2)%}
+                    <td>{{row[i]}}</td>
+                    {%endfor%}
+            </tr>
+            {%endfor%}
+        </table>
+
         <div style="padding: 20px;">
-            <h2 style="color: green;">Add New Airport</h2>
+            <h2 style="color: green;">Add New Airplane</h2>
         </div>
 
         <div style="padding: 20px;">
             <div class="text-bg-light p-3"">
-                {{wtf.quick_form(form, button_map={'submit': 'btn btn-success'})}}
+                {{wtf.quick_form(form, button_map={'submit': 'success'})}}
             </div>
         </div>
     </body>
