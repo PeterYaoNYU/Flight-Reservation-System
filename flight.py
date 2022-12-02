@@ -70,15 +70,22 @@ def publicinfo():
         print(data_public)
         return render_template("publicinfo.html", data_public = data_public)
     
+class AgentRegisterForm(FlaskForm):
+    email = EmailField("Email", validators=[InputRequired(),])
+    password = PasswordField("Password", validators=[InputRequired(), ])
+    booking_agent_id = IntegerField("Booking Agent ID", validators=[InputRequired(),])
+    submit = SubmitField("Submit", render_kw = {'style': 'margin: 20px;'})
+
 @app.route('/agent_register', methods=['POST', 'GET'])
 def agent_register():
+    form = AgentRegisterForm()
     if request.method == 'GET':
         error = None;
-        return render_template('agent_register.html')
+        return render_template('agent_register.html', form = form)
     if request.method == 'POST':
-        email=request.form.get('email')
-        password=request.form.get('password')
-        booking_agent_id = request.form.get('booking_agent_id')
+        email=form.email.data
+        password=form.password.data
+        booking_agent_id = form.booking_agent_id.data
         cursor=conn.cursor()
         check_query="select email from booking_agent where email = '{}';"
         cursor.execute(check_query.format(email))
@@ -86,7 +93,8 @@ def agent_register():
         cursor.close()
         if (existed_user):
             error = 'Agent Exists'
-            return redirect('/agent_register?error=%s' % error)
+            flash("Agent Already Exists")
+            return redirect('/agent_register')
         else:
             conn.reconnect()
             cursor = conn.cursor()
@@ -95,7 +103,7 @@ def agent_register():
             conn.commit()
             cursor.close()
             print('done inserting')
-            return redirect('/publicinfo')
+            return redirect('/login')
         
 class CustomerRegistrationForm(FlaskForm):
     email = EmailField("Email", validators=[DataRequired()])
@@ -673,6 +681,8 @@ def add_airplane():
                 flash("Successfully Add New Airplanes")
                 return redirect("/add_airplane")
         return redirect("/add_airplane")
+    
+
             
 
 @app.route('/staff_home', methods = ["GET", ])
