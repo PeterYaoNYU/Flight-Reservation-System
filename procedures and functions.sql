@@ -117,7 +117,7 @@ begin
     and f.arrive_airport = arrive
     and f.depart_airport = depart
     and (select count(*) from ticket t where t.flight_num = f.flight_num) < 
-        (select seats from airplane a where a.id = f.airplane_id);
+        (select seats from airplane a where a.id = f.airplane_id and a.airline_name = f.airline_name);
 end//
 delimiter ;
 
@@ -140,7 +140,7 @@ begin
     select seats
     into totalSeats
     from airplane
-    WHERE id = airplaneId;
+    WHERE id = airplaneId and airline_name = airlineName;
 
     SELECT count(*)
     into seatsTaken
@@ -417,4 +417,4 @@ begin
 end //
 delimiter ;
 
-        
+
