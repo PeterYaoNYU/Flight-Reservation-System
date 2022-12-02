@@ -58,7 +58,7 @@
           {% if messages %}
             <ul class="list-group">
             {% for category, message in messages %}
-              <li class="list-group-item list-group-item-primary">{{ message }}</li>
+              <li class="list-group-item list-group-item-success">{{ message }}</li>
             {% endfor %}
             </ul>
           {% endif %}
@@ -66,14 +66,15 @@
 
         <h2 style="color: green;">Add New Booking Agent for {{airline_name}} </h2>
         <form method="POST" action="/add_booking_agent">
-            <div class="mb-3">
-                <label for="avail_booking_agent">avail_booking_agent</label>
+            <div class="mb-3" style="padding: 20px; color: green; font-size: 25px;">
+                <label for="avail_booking_agent">Add Booking Agent (the following agents are not working for your airline yet)</label>
                 <select class="form-select" name="avail_booking_agent" id="avail_booking_agent">
                     {% for row in avail_booking_agent %}
                     <option value="{{row[0]}}">{{row[0]}}</option>
                     {%endfor%}
                 </select>
             </div>
+            <input class="btn btn-success" type="submit" name="submit" style="margin: 20px;">
         </form>
     </body>
 </html>

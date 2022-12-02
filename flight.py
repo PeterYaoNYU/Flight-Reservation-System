@@ -647,11 +647,15 @@ def add_booking_agent():
     avail_booking_agent = get_avail_booking_agent(airline_name)
     if request.method== "GET":
         return render_template("add_booking_agent.html", airline_name = airline_name, avail_booking_agent = avail_booking_agent)
-    
-        
-        
-
-
+    elif request.method=="POST":
+        agent_email = request.form.get("avail_booking_agent")
+        print(agent_email)
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        cursor.execute("insert into works_for values(%s, %s);", (airline_name, agent_email))
+        conn.commit()
+        flash("New Agent Added")
+        return redirect("/add_booking_agent")
 
 # ******************************************************************
 # view top 5 booking agents (all staff)
