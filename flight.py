@@ -623,7 +623,7 @@ def get_staff_airline():
     return airline_name[0]
 
 # ******************************************************************
-# Add New Airplane (admin)
+# Add New Booking Agent (admin)
 # ******************************************************************
 def get_avail_booking_agent(airline_name):
     stmt = "call avail_booking_agent(%s);"
