@@ -430,3 +430,38 @@ begin
 end//
 delimiter ;
 
+delimiter //
+create procedure top_destination_3_month(
+    in airlineName  varchar(30)
+)
+begin
+    with destination as (
+        select count(ticket_id) as total, arrive_airport
+        from ticket natural join flight
+        where airline_name = airlineName and departure_time between DATE_SUB(date(now()), interval 3 MONTH) and now()
+        group by arrive_airport
+        order by total desc 
+        limit 3
+    )
+    select concat(city, "/", arrive_airport), total
+    from destination join airport on (destination.arrive_airport = airport.name);
+end//
+delimiter ;
+
+delimiter //
+create procedure top_destination_1_year(
+    in airlineName  varchar(30)
+)
+begin
+    with destination as (
+        select count(ticket_id) as total, arrive_airport
+        from ticket natural join flight
+        where airline_name = airlineName and departure_time between DATE_SUB(date(now()), interval 1 YEAR) and now()
+        group by arrive_airport
+        order by total desc 
+        limit 3
+    )
+    select concat(city, "/", arrive_airport), total
+    from destination join airport on (destination.arrive_airport = airport.name);
+end//
+delimiter ;
