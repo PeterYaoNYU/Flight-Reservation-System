@@ -465,3 +465,17 @@ begin
     from destination join airport on (destination.arrive_airport = airport.name);
 end//
 delimiter ;
+
+delimiter //
+create procedure frequent_customer(
+    in airlineName  varchar(30)
+)
+begin
+    select customer_email, count(ticket_id) as total
+    from flight natural join ticket
+    where airline_name = airlineName
+    and departure_time between DATE_SUB(now(), INTERVAL 1 year) and now()
+    group by customer_email
+    order by total desc;
+end//
+delimiter ;
