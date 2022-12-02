@@ -378,3 +378,43 @@ begin
     select id from airplane where airline_name = airlineName and id = planeId;
 end //
 delimiter ;
+
+delimiter //
+create procedure staff_view_booking_agent(
+    in airlineName  varchar(30),
+    in benchmark    varchar(30),
+    in dateRange    varchar(30)
+)
+begin
+    if benchmark="ticket" and dateRange="year" then
+        select booking_agent_email ,count(*) as total 
+        from ticket natural join flight
+        where booking_agent_email in (
+            select w.booking_agent_email from works_for as w where w.airline_name = airlineName
+        ) and (departure_time between DATE_SUB(NOW(), INTERVAL 1 YEAR) and NOW())
+        group by booking_agent_email
+        order by total desc
+        limit 5;
+    elseif benchmark = "ticket" and dateRange = "month" then
+        select booking_agent_email, count(*) as total 
+        from ticket natural join flight
+        where booking_agent_email in (
+            select w.booking_agent_email from works_for as w where w.airline_name = airlineName
+        ) and (departure_time between DATE_SUB(NOW(), INTERVAL 1 MONTH) and NOW())
+        group by booking_agent_email
+        order by total desc 
+        limit 5;
+    elseif benchmark = "amount" and dateRange = "year" then
+        select booking_agent_email ,sum(price) as total 
+        from ticket natural join flight
+        where booking_agent_email in (
+            select w.booking_agent_email from works_for as w where w.airline_name = airlineName
+        ) and (departure_time between DATE_SUB(NOW(), INTERVAL 1 YEAR) and now())
+        group by booking_agent_email
+        order by total desc
+        limit 5;
+    end if;
+end //
+delimiter ;
+
+        
