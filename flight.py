@@ -645,7 +645,8 @@ def comparison_of_revenue():
     totalSalesYear = cursor.fetchone()[0]
     indirectSalesMonth = totalSalesMonth - directSalesMonth
     indirectSalesYear  = totalSalesYear - directSalesYear
-    return render_template("comparison_of_revenue.html", airline_name=airline_name, data1=[['Direct Sales Last Month', directSalesMonth], ["Indirect Sales Last Month", indirectSalesMonth]])
+    return render_template("comparison_of_revenue.html", airline_name=airline_name, data1=[['Direct Sales Last Month', directSalesMonth], ["Indirect Sales Last Month", indirectSalesMonth]], 
+                           data3 = [['Direct Sales Last Year', directSalesYear], ["Indirect Sales Last Year", indirectSalesYear]])
 
     
     

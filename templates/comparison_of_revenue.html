@@ -9,13 +9,14 @@
       // Load the Visualization API and the corechart package.
       google.charts.load('current', {'packages':['corechart']});
 
-      // Set a callback to run when the Google Visualization API is loaded.
-      google.charts.setOnLoadCallback(drawChart);
+      google.charts.setOnLoadCallback(drawMonthChart);
+
+      google.charts.setOnLoadCallback(drawYearChart);
 
       // Callback that creates and populates a data table,
       // instantiates the pie chart, passes in the data and
       // draws it.
-      function drawChart() {
+      function drawMonthChart() {
 
         // Create the data table.
         var data = new google.visualization.DataTable();
@@ -29,13 +30,34 @@
 
         // Set chart options
         var options = {'title':'Comparison Of Revenue Source Last Month',
-                       'width':800,
-                       'height':700};
+                       'width':600,
+                       'height':500};
 
         // Instantiate and draw our chart, passing in some options.
         var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
         chart.draw(data, options);
       }
+
+      function drawYearChart() {
+        var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Source');
+            data.addColumn('number', 'Amount');
+            data.addRows([
+                {%for revenue_source, num in data3 %}
+                ['{{revenue_source}}', {{num}}],
+                {%endfor%}
+            ]);
+
+        var options = {'title':'Comparison Of Revenue Source Last Year',
+                        'width':600,
+                        'height':500};
+
+        var chart = new google.visualization.PieChart(document.getElementById('chart_div2'));
+
+        chart.draw(data, options);
+      }
+
+
     </script>
         <title>Home-Flight Reservation</title>
     </head>
@@ -99,14 +121,15 @@
         {% endwith %}
 
         <h2 style="padding: 20px; color: green;">Comparison of Revenue Source for {{airline_name}}</h2>
-
+        
         <div class="container text-left" style="padding: 20px;">
             <div class="col">
                 <div id="chart_div"></div>
             </div>
             <div class="col">
-                <div id="chart_div"></div>
+                <div id="chart_div2"></div>
             </div>
         </div>
+
     </body>
 </html>
