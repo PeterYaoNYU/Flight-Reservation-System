@@ -650,10 +650,33 @@ def view_top_destinations():
     # render the template with the info 
     return render_template("view_top_destinations.html", three_month = three_month, one_year = one_year)
 
-    
-
-
-
+# ******************************************************************
+# check frequent customers (all)
+# ************************n******************************************    
+@app.route("/view_frequent_customer", methods = ["GET", "POST"])
+@app.route("/view_frequent_customer/<customer_email>", methods = ["GET", "POST"])
+def view_frequent_customer(customer_email = None):
+    # first check if the user is authorized to do this!
+    if not check_staff_validity():
+        flash("Only Staff Can Access")
+        return redirect("/login")
+    airline_name = get_staff_airline()
+    # fetch the list of frequent customers 
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call frequent_customer (%s);", (airline_name, ))
+    frequent_customer = cursor.fetchall()
+    cursor.close()
+    # render the template
+    if request.method == "GET" and customer_email:
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        cursor.execute("call all_flights_taken (%s, %s);", (customer_email, airline_name))
+        all_flights = cursor.fetchall()
+        cursor.close()
+        return render_template("view_frequent_customer.html", airline_name = airline_name, frequent_customer = frequent_customer, all_flights=all_flights)
+    if request.method == "GET":
+        return render_template("view_frequent_customer.html", airline_name = airline_name, frequent_customer = frequent_customer)
 
 
 # ******************************************************************

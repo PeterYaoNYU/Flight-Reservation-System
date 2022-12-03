@@ -323,7 +323,6 @@ end //
 delimiter ;
 
 
-
 delimiter //
 create procedure get_airline_airplane(
     in airline  varchar(30)
@@ -479,3 +478,17 @@ begin
     order by total desc;
 end//
 delimiter ;
+
+delimiter //
+create procedure  all_flights_taken(
+    in customerEmail    varchar(30),
+    in airlineName      varchar(30)
+)
+begin
+    select flight_num, date(departure_time), date(arrival_time), price, concat(arrive_airport, "/", (select city from airport where name = arrive_airport)), concat(depart_airport, "/", (select city from airport where name = depart_airport))
+    from ticket natural join flight
+    where customer_email = customerEmail and airline_name = airlineName
+    order by departure_time desc;
+end//
+delimiter ;
+
