@@ -623,6 +623,32 @@ def get_staff_airline():
     return airline_name[0]
 
 # ******************************************************************
+# comparison of revenue earned (all)
+# ******************************************************************
+@app.route("/comparison_of_revenue", methods=["GET", "POST"])
+def comparison_of_revenue():
+    # first check if the user is authorized to do this!
+    if not check_staff_validity():
+        flash("Only Staff Can Access")
+        return redirect("/login")
+    airline_name = get_staff_airline()
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call comparisonRevenueEarned(%s, @directSalesMonth, @directSalesYear, @totalSalesMonth, @totalSalesYear);", (airline_name, ))
+    directSalesMonth = cursor.execute("select @directSalesMonth;")
+    directSalesYear = cursor.execute("select @directSalesYear;")
+    totalSalesMonth = cursor.execute("select @totalSalesMonth;")
+    totalSalesYear = cursor.execute("select @totalSalesYear;")
+    indirectSalesMonth = totalSalesMonth - directSalesMonth
+    indirectSalesYear  = totalSalesYear - directSalesYear
+    return render_template("comparison_of_revenue.html", airline_name=airline_name, data1=[['Direct Sales Last Month', directSalesMonth], ["Indirect Sales Last Month", indirectSalesMonth]])
+
+    
+    
+        
+
+
+# ******************************************************************
 # grant new permissions(admin)
 # ******************************************************************
 # get all staff that works for this airline

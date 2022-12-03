@@ -520,4 +520,34 @@ begin
 end //
 delimiter ;
 
+delimiter //
+create procedure comparisonRevenueEarned(
+    in airlineName  varchar(30),
+    out directSalesMonth    float,
+    out directSalesYear     float,
+    out totalSalesMonth     float,
+    out totalSalesYear      float
+)
+begin
+    select sum(price) into totalSalesMonth
+    from flight natural JOIN ticket
+    where airline_name = airlineName and departure_time BETWEEN DATE_SUB(NOW(), interval 1 month) and now();
 
+    select sum(price) into totalSalesYear
+    from flight natural JOIN ticket
+    where airline_name = airlineName and departure_time BETWEEN DATE_SUB(NOW(), interval 1 YEAR) and now();
+
+    select sum(price) into directSalesMonth
+    from flight natural JOIN ticket
+    where airline_name = airlineName and departure_time BETWEEN DATE_SUB(NOW(), interval 1 month) and now() and booking_agent_email is NULL;
+
+    select sum(price) into directSalesYear
+    from flight natural JOIN ticket
+    where airline_name = airlineName and departure_time BETWEEN DATE_SUB(NOW(), interval 1 year) and now() and booking_agent_email is NULL;
+end//
+delimiter ;
+
+
+
+
+    
