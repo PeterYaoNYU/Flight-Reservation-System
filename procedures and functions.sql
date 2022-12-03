@@ -492,3 +492,32 @@ begin
 end//
 delimiter ;
 
+delimiter //
+create procedure get_all_staff(
+    in airlineName  varchar(30)
+)
+begin 
+    select username, first_name, last_name
+    from airline_staff
+    where airline_name = airlineName;
+end//
+delimiter ;
+
+delimiter //
+create procedure get_all_permission()
+begin
+    select * from permission;
+end //
+delimiter ;
+
+delimiter //
+create procedure grant_new_permission(
+    in userName varchar(30),
+    in newPermission   varchar(30)
+)
+begin
+    insert ignore into staff_permission values (userName, newPermission);
+end //
+delimiter ;
+
+

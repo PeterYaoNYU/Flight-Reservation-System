@@ -623,6 +623,56 @@ def get_staff_airline():
     return airline_name[0]
 
 # ******************************************************************
+# grant new permissions(admin)
+# ******************************************************************
+# get all staff that works for this airline
+def get_all_staff(airline_name):
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call get_all_staff(%s);" , (airline_name, ))
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+# get all possible permissions
+def get_all_permission():
+    conn.reconnect()
+    cursor = conn.cursor(prepared=True)
+    cursor.execute("call get_all_permission();")
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+@app.route("/grant_new_permission", methods=["GET", "POST"])
+def grant_new_permission():
+    # first check if the user is authorized to do this!
+    if not check_staff_validity():
+        flash("Only Staff Can Access")
+        return redirect("/login")
+    # make sure the person accessing this page has admin permission
+    if not check_staff_role("admin"):
+        flash("Only Admin Has Permission to Change Status")
+        return redirect("/home")
+    airline_name = get_staff_airline()
+    all_staff = get_all_staff(airline_name)
+    all_permission = get_all_permission()
+    if request.method== "GET":
+        return render_template("grant_new_permission.html", airline_name=airline_name, all_staff = all_staff, all_permission = all_permission)
+    elif request.method == "POST":
+        staff = request.form.get("staff")
+        permission = request.form.get("permission")
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        cursor.execute("call grant_new_permission(%s, %s);", (staff, permission))
+        conn.commit()
+        cursor.close()
+        flash("Successfullt Inserted New Permission")
+        return redirect("/grant_new_permission")
+    
+    
+    
+
+# ******************************************************************
 # check top destinations (all)
 # ******************************************************************
 @app.route("/view_top_destinations")

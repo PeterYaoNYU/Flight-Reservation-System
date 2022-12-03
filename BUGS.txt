@@ -1,6 +1,5 @@
 1. customer purchase need to show not only airport abbreviation but also city
 
-
 2. (solved) agentpurchase confirm procedure also needs to check whether the booking agent is working for this flight!!!
 
 3. agent buy for which customer? (solved)
@@ -9,4 +8,6 @@
 
 5. public info query is shit!!!!
 
-6. view top clinets lack title
+6. view top clinets lack title (fixed)
+
+7. staff home is not informative
