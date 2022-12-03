@@ -635,10 +635,14 @@ def comparison_of_revenue():
     conn.reconnect()
     cursor = conn.cursor(prepared=True)
     cursor.execute("call comparisonRevenueEarned(%s, @directSalesMonth, @directSalesYear, @totalSalesMonth, @totalSalesYear);", (airline_name, ))
-    directSalesMonth = cursor.execute("select @directSalesMonth;")
-    directSalesYear = cursor.execute("select @directSalesYear;")
-    totalSalesMonth = cursor.execute("select @totalSalesMonth;")
-    totalSalesYear = cursor.execute("select @totalSalesYear;")
+    cursor.execute("select @directSalesMonth;")
+    directSalesMonth = cursor.fetchone()[0]
+    cursor.execute("select @directSalesYear;")
+    directSalesYear = cursor.fetchone()[0]
+    cursor.execute("select @totalSalesMonth;")
+    totalSalesMonth = cursor.fetchone()[0]
+    cursor.execute("select @totalSalesYear;")
+    totalSalesYear = cursor.fetchone()[0]
     indirectSalesMonth = totalSalesMonth - directSalesMonth
     indirectSalesYear  = totalSalesYear - directSalesYear
     return render_template("comparison_of_revenue.html", airline_name=airline_name, data1=[['Direct Sales Last Month', directSalesMonth], ["Indirect Sales Last Month", indirectSalesMonth]])
