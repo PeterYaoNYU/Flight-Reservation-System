@@ -547,7 +547,19 @@ begin
 end//
 delimiter ;
 
-
+delimiter //
+create procedure view_reports(
+    in airlineName  varchar(30),
+    in beginDate    date,
+    in endDate      date
+)
+begin
+    select count(ticket_id) as total, year(departure_time) as year, month(departure_time) as month
+    from ticket natural join flight
+    where airline_name = airlineName and date(departure_time) between beginDate and endDate
+    group by year(departure_time), month(departure_time);
+end //
+delimiter ;
 
 
     

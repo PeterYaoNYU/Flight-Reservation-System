@@ -623,6 +623,32 @@ def get_staff_airline():
     return airline_name[0]
 
 # ******************************************************************
+# view reports (all)
+# ******************************************************************
+class StaffViewReport:
+    start_date = DateField("Start Date", validators=[DataRequired(),])
+    end_date = DateField("End Date", validators=[DataRequired(), ])
+    submit = SubmitField("Submit",  render_kw = {'style': 'margin: 20px;'})
+
+
+@app.route("/view_report", methods = ["GET", "POST"])
+def view_report():
+    # first check if the user is authorized to do this!
+    if not check_staff_validity():
+        flash("Only Staff Can Access")
+        return redirect("/login")
+    airline_name = get_staff_airline()
+    form = StaffViewReport()
+    if request.method == "GET":
+        return render_template("staff_view_report.html", form = form, airline_name = airline_name)
+    # if request.method == "POST":
+    #     conn.reconnect()
+    #     cursor = conn.cursor(prepared=True)
+    #     cursor.execute("call ") 
+
+
+
+# ******************************************************************
 # comparison of revenue earned (all)
 # ******************************************************************
 @app.route("/comparison_of_revenue", methods=["GET", "POST"])
