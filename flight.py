@@ -625,7 +625,7 @@ def get_staff_airline():
 # ******************************************************************
 # view reports (all)
 # ******************************************************************
-class StaffViewReport:
+class StaffViewReport(FlaskForm):
     start_date = DateField("Start Date", validators=[DataRequired(),])
     end_date = DateField("End Date", validators=[DataRequired(), ])
     submit = SubmitField("Submit",  render_kw = {'style': 'margin: 20px;'})
@@ -641,11 +641,19 @@ def view_report():
     form = StaffViewReport()
     if request.method == "GET":
         return render_template("staff_view_report.html", form = form, airline_name = airline_name)
-    # if request.method == "POST":
-    #     conn.reconnect()
-    #     cursor = conn.cursor(prepared=True)
-    #     cursor.execute("call ") 
-
+    if request.method == "POST":
+        start_date = form.start_date.data
+        end_date = form.end_date.data
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        cursor.execute("call view_reports(%s, %s, %s);", (airline_name, start_date, end_date)) 
+        result = cursor.fetchall()
+        cursor.close()
+        conn.reconnect()
+        cursor = conn.cursor(prepared=True)
+        cursor.execute("call view_reports_total(%s, %s, %s);", (airline_name, start_date, end_date))
+        total = cursor.fetchone()[0]
+        return render_template("staff_view_report.html", form = form, airline_name = airline_name, result = result, total = total)
 
 
 # ******************************************************************
