@@ -983,7 +983,7 @@ def staff_view_flights():
 def check_staff_role(role):
     conn.reconnect()
     cursor = conn.cursor(prepared=True)
-    cursor.execute("call check_staff_role(%s, %s);", (session['email'], "admin"))
+    cursor.execute("call check_staff_role(%s, %s);", (session['email'], role))
     result = cursor.fetchall()
     print(result)
     if len(result) == 0:

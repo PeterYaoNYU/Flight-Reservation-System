@@ -4,10 +4,10 @@
 
 3. agent buy for which customer? (solved)
 
-4. agent view top customers bar chart
+4. agent view top customers bar chart 
 
 5. public info query is shit!!!!
 
 6. view top clinets lack title (fixed)
 
-7. staff home is not informative
+7. staff home is not informative (solved)
