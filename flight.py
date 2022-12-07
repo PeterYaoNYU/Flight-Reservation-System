@@ -1153,8 +1153,10 @@ def add_new_airport():
 
 @app.route('/logout')
 def logout():
-    session.pop('role')
-    session.pop('email')
+    if "role" in session: 
+        session.pop('role')
+    if "email" in session:
+        session.pop('email')
     return redirect('/login')
 
 def findname():
