@@ -767,6 +767,14 @@ spending_query="select sum(price) as spending, year(departure_time) as year, mon
     group by year(departure_time), month(departure_time);"
 ```
 
+---
+## File Lists
+1. ***ALL HTML shall be found in the templates folder***   
+2. The Main Project is the ***flight.py***   
+3. DDL can be found in flight_DDL.sql
+
+
+
 
 
 
